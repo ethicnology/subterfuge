@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:subterfuge/screen/create_secret.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -13,7 +14,8 @@ class HomeScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const HomeScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const CreateSecretScreen()),
                 );
               },
               child: const Text('Create Shared Secret'),
