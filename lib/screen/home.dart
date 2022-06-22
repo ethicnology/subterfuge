@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:subterfuge/screen/create_secret.dart';
+import 'package:subterfuge/widget/disclaimer.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -10,6 +11,7 @@ class HomeScreen extends StatelessWidget {
         appBar: AppBar(title: const Text('Subterfuge')),
         body: Column(
           children: [
+            const DisclaimerWidget(),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
