@@ -16,7 +16,7 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
   bool hasPassphrase = false;
   TextEditingController secret = TextEditingController();
   TextEditingController passphrase = TextEditingController();
-  TextEditingController groups = TextEditingController();
+  TextEditingController shares = TextEditingController();
   TextEditingController threshold = TextEditingController();
 
   @override
@@ -32,59 +32,85 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
         body: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              TextFormField(
-                controller: secret,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Master Secret',
-                ),
-              ),
-              SwitchListTile(
-                  title: const Text('Passphrase ?'),
-                  value: hasPassphrase,
-                  onChanged: (bool value) {
-                    setState(() {
-                      hasPassphrase = value;
-                    });
-                  }),
-              if (hasPassphrase)
-                TextFormField(
-                  enableSuggestions: false,
-                  autocorrect: false,
-                  controller: passphrase,
-                  decoration: const InputDecoration(
-                      icon: Icon(Icons.password), labelText: 'Passphrase'),
-                ),
-              TextFormField(
-                controller: groups,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Groups',
-                ),
-              ),
-              TextFormField(
-                controller: threshold,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Threshold',
-                ),
-              ),
+              Card(
+                  color: Colors.teal[200],
+                  child: Padding(
+                      padding: const EdgeInsets.all(7),
+                      child: TextFormField(
+                        controller: secret,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          border: UnderlineInputBorder(),
+                          labelText: 'Master Secret',
+                        ),
+                      ))),
+              Card(
+                  color: Colors.teal[200],
+                  child: Column(children: [
+                    SwitchListTile(
+                        title: const Text('Passphrase ?'),
+                        value: hasPassphrase,
+                        onChanged: (bool value) {
+                          setState(() {
+                            hasPassphrase = value;
+                          });
+                        }),
+                    if (hasPassphrase)
+                      Padding(
+                          padding: const EdgeInsets.all(7),
+                          child: TextFormField(
+                            enableSuggestions: false,
+                            autocorrect: false,
+                            controller: passphrase,
+                            decoration:
+                                const InputDecoration(labelText: 'Passphrase'),
+                          )),
+                  ])),
+              Card(
+                  color: Colors.teal[200],
+                  child: Padding(
+                      padding: const EdgeInsets.all(7),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Flexible(
+                              child: SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.3,
+                                  child: TextFormField(
+                                    controller: shares,
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(
+                                      border: UnderlineInputBorder(),
+                                      labelText: 'Shares',
+                                    ),
+                                  ))),
+                          Flexible(
+                              child: SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.3,
+                                  child: TextFormField(
+                                    controller: threshold,
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(
+                                      border: UnderlineInputBorder(),
+                                      labelText: 'Threshold',
+                                    ),
+                                  ))),
+                        ],
+                      ))),
               ElevatedButton(
                 onPressed: () {
+                  List<List<int>> scheme = [
+                    for (var i = 0; i < int.parse(shares.text); i++) [1, 1]
+                  ];
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => SharesScreen(
-                              slip: Slip39.from([
-                                [1, 1],
-                                [1, 1],
-                                [1, 1]
-                              ],
+                              slip: Slip39.from(scheme,
                                   masterSecret:
                                       Uint8List.fromList(secret.text.codeUnits),
                                   passphrase: passphrase.text,
