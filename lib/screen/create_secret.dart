@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:convert/convert.dart';
 import 'package:flutter/material.dart';
 import 'package:slip39/slip39.dart';
 import 'package:subterfuge/screen/shares.dart';
@@ -21,7 +22,10 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
 
   @override
   void dispose() {
+    secret.dispose();
     passphrase.dispose();
+    shares.dispose();
+    threshold.dispose();
     super.dispose();
   }
 
@@ -35,7 +39,7 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Card(
-                  color: Colors.teal[200],
+                  color: Colors.teal,
                   child: Padding(
                       padding: const EdgeInsets.all(7),
                       child: TextFormField(
@@ -47,7 +51,7 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                         ),
                       ))),
               Card(
-                  color: Colors.teal[200],
+                  color: Colors.teal,
                   child: Column(children: [
                     SwitchListTile(
                         title: const Text('Passphrase ?'),
@@ -69,7 +73,7 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                           )),
                   ])),
               Card(
-                  color: Colors.teal[200],
+                  color: Colors.teal,
                   child: Padding(
                       padding: const EdgeInsets.all(7),
                       child: Row(
@@ -102,6 +106,10 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                         ],
                       ))),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.white,
+                  onPrimary: Colors.teal,
+                ),
                 onPressed: () {
                   List<List<int>> scheme = [
                     for (var i = 0; i < int.parse(shares.text); i++) [1, 1]
@@ -111,8 +119,8 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                     MaterialPageRoute(
                         builder: (context) => SharesScreen(
                               slip: Slip39.from(scheme,
-                                  masterSecret:
-                                      Uint8List.fromList(secret.text.codeUnits),
+                                  masterSecret: Uint8List.fromList(
+                                      hex.decode(secret.text)),
                                   passphrase: passphrase.text,
                                   threshold: int.parse(threshold.text)),
                             )),
