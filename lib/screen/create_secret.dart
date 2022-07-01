@@ -44,7 +44,6 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                       padding: const EdgeInsets.all(7),
                       child: TextFormField(
                         controller: secret,
-                        keyboardType: TextInputType.number,
                         decoration: const InputDecoration(
                           border: UnderlineInputBorder(),
                           labelText: 'Master Secret',
