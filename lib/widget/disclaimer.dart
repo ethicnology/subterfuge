@@ -10,7 +10,7 @@ class DisclaimerWidget extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       content: const Text('Experimental Prototype: Use it at your own risk.'),
       leading: const Icon(Icons.pan_tool),
-      backgroundColor: Colors.redAccent,
+      backgroundColor: Colors.red,
       actions: <Widget>[
         TextButton(
           onPressed: () {
