@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:subterfuge/screen/create_secret.dart';
+import 'package:subterfuge/screen/recover_secret.dart';
 import 'package:subterfuge/widget/disclaimer.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -13,6 +14,10 @@ class HomeScreen extends StatelessWidget {
           children: [
             const DisclaimerWidget(),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                primary: Colors.white,
+                onPrimary: Colors.teal,
+              ),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -21,6 +26,20 @@ class HomeScreen extends StatelessWidget {
                 );
               },
               child: const Text('Create Shared Secret'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                primary: Colors.white,
+                onPrimary: Colors.teal,
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const RecoverSecretScreen()),
+                );
+              },
+              child: const Text('Recover Shared Secret'),
             ),
           ],
         ));
