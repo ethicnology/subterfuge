@@ -89,6 +89,10 @@ class _RecoverSecretScreenState extends State<RecoverSecretScreen> {
                             },
                           ))),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.white,
+                  onPrimary: Colors.teal,
+                ),
                 onPressed: () {
                   var sharesList = List<String>.from(shares.values);
                   List<int> secret = Slip39.recoverSecret(
