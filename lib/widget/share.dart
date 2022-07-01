@@ -8,7 +8,7 @@ class ShareWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-        color: Colors.deepPurple,
+        color: Colors.teal,
         child: Column(
           children: [
             Text('Share $number: '),
