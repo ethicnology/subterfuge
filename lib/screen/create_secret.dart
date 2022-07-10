@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:convert/convert.dart';
@@ -19,6 +20,7 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
   TextEditingController passphrase = TextEditingController();
   TextEditingController shares = TextEditingController();
   TextEditingController threshold = TextEditingController();
+  var random = Random.secure();
 
   @override
   void dispose() {
@@ -38,6 +40,20 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.white,
+                  onPrimary: Colors.teal,
+                ),
+                onPressed: () {
+                  var randomValues =
+                      List<int>.generate(32, (i) => random.nextInt(256));
+                  setState(() {
+                    secret.text = hex.encode(randomValues);
+                  });
+                },
+                child: const Text('Generate Random Secret (256bits)'),
+              ),
               Card(
                   color: Colors.teal,
                   child: Padding(
@@ -46,7 +62,7 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                         controller: secret,
                         decoration: const InputDecoration(
                           border: UnderlineInputBorder(),
-                          labelText: 'Master Secret',
+                          labelText: 'Secret',
                         ),
                       ))),
               Card(
