@@ -2,8 +2,8 @@ import 'package:convert/convert.dart';
 import 'package:flutter/material.dart';
 
 class SecretScreen extends StatelessWidget {
-  List<int> secret;
-  SecretScreen({super.key, required this.secret});
+  final List<int> secret;
+  const SecretScreen({super.key, required this.secret});
 
   @override
   Widget build(BuildContext context) {

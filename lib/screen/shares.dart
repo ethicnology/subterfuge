@@ -3,8 +3,8 @@ import 'package:slip39/slip39.dart';
 import 'package:subterfuge/widget/group.dart';
 
 class SharesScreen extends StatelessWidget {
-  Slip39 slip;
-  SharesScreen({super.key, required this.slip});
+  final Slip39 slip;
+  const SharesScreen({super.key, required this.slip});
 
   @override
   Widget build(BuildContext context) {

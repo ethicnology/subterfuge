@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:subterfuge/widget/share.dart';
 
 class GroupWidget extends StatelessWidget {
-  String number;
-  List<String> shares;
-  GroupWidget({super.key, required this.number, required this.shares});
+  final String number;
+  final List<String> shares;
+  const GroupWidget({super.key, required this.number, required this.shares});
 
   @override
   Widget build(BuildContext context) {
