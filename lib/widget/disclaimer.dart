@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:subterfuge/screen/home.dart';
+import 'package:subterfuge/screen/disclaimer.dart';
 
 class DisclaimerWidget extends StatelessWidget {
   const DisclaimerWidget({Key? key}) : super(key: key);
@@ -16,7 +16,7 @@ class DisclaimerWidget extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
+              MaterialPageRoute(builder: (context) => const DisclaimerScreen()),
             );
           },
           child: const Text('OPEN'),
