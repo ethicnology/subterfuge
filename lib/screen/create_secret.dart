@@ -51,6 +51,12 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                   setState(() {
                     secret.text = hex.encode(randomValues);
                   });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content:
+                          Text('You should provide your own source of entropy'),
+                    ),
+                  );
                 },
                 child: const Text('Generate Random Secret (256bits)'),
               ),
@@ -62,8 +68,15 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                         controller: secret,
                         decoration: const InputDecoration(
                           border: UnderlineInputBorder(),
+                          hintText: 'eg. 0123456789abcdef0123456789ABCDEF',
                           labelText: 'Secret',
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Fill the secret with a hexadecimal string';
+                          }
+                          return null;
+                        },
                       ))),
               Card(
                   color: Colors.teal,
@@ -83,8 +96,10 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                             enableSuggestions: false,
                             autocorrect: false,
                             controller: passphrase,
-                            decoration:
-                                const InputDecoration(labelText: 'Passphrase'),
+                            decoration: const InputDecoration(
+                              labelText: 'Passphrase',
+                              hintText: 'eg. MySecretPassphrase',
+                            ),
                           )),
                   ])),
               Card(
@@ -105,6 +120,13 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                                       border: UnderlineInputBorder(),
                                       labelText: 'Shares',
                                     ),
+                                    validator: (value) {
+                                      if (value == null ||
+                                          int.tryParse(value) == null) {
+                                        return 'Fill with an integer';
+                                      }
+                                      return null;
+                                    },
                                   ))),
                           Flexible(
                               child: SizedBox(
@@ -117,6 +139,13 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                                       border: UnderlineInputBorder(),
                                       labelText: 'Threshold',
                                     ),
+                                    validator: (value) {
+                                      if (value == null ||
+                                          int.tryParse(value) == null) {
+                                        return 'Fill with an integer';
+                                      }
+                                      return null;
+                                    },
                                   ))),
                         ],
                       ))),
@@ -126,6 +155,11 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                   onPrimary: Colors.teal,
                 ),
                 onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Processing')),
+                    );
+                  }
                   List<List<int>> scheme = [
                     for (var i = 0; i < int.parse(shares.text); i++) [1, 1]
                   ];
