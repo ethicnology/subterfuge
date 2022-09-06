@@ -13,6 +13,7 @@ class HomeScreen extends StatelessWidget {
         body: Column(
           children: [
             const DisclaimerWidget(),
+            const Divider(),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 primary: Colors.white,
@@ -27,6 +28,7 @@ class HomeScreen extends StatelessWidget {
               },
               child: const Text('Create Shared Secret'),
             ),
+            const SizedBox(height: 10),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 primary: Colors.white,

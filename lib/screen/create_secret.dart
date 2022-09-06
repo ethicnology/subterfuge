@@ -36,149 +36,151 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
     return Scaffold(
         appBar: AppBar(title: const Text('Create Shared Secret')),
         body: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  primary: Colors.white,
-                  onPrimary: Colors.teal,
-                ),
-                onPressed: () {
-                  var randomValues =
-                      List<int>.generate(32, (i) => random.nextInt(256));
-                  setState(() {
-                    secret.text = hex.encode(randomValues);
-                  });
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content:
-                          Text('You should provide your own source of entropy'),
+            key: _formKey,
+            child: Center(
+                child: SizedBox(
+              width: 500,
+              child: Column(
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.white,
+                      onPrimary: Colors.teal,
                     ),
-                  );
-                },
-                child: const Text('Generate Random Secret (256bits)'),
-              ),
-              Card(
-                  color: Colors.teal,
-                  child: Padding(
-                      padding: const EdgeInsets.all(7),
-                      child: TextFormField(
-                        controller: secret,
-                        decoration: const InputDecoration(
-                          border: UnderlineInputBorder(),
-                          hintText: 'eg. 0123456789abcdef0123456789ABCDEF',
-                          labelText: 'Secret',
+                    onPressed: () {
+                      var randomValues =
+                          List<int>.generate(32, (i) => random.nextInt(256));
+                      setState(() {
+                        secret.text = hex.encode(randomValues);
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                              'You should provide your own source of entropy'),
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Fill the secret with a hexadecimal string';
-                          }
-                          return null;
-                        },
-                      ))),
-              Card(
-                  color: Colors.teal,
-                  child: Column(children: [
-                    SwitchListTile(
-                        title: const Text('Passphrase ?'),
-                        value: hasPassphrase,
-                        onChanged: (bool value) {
-                          setState(() {
-                            hasPassphrase = value;
-                          });
-                        }),
-                    if (hasPassphrase)
-                      Padding(
+                      );
+                    },
+                    child: const Text('Generate Random Secret (256bits)'),
+                  ),
+                  Card(
+                      color: Colors.teal,
+                      child: Padding(
                           padding: const EdgeInsets.all(7),
                           child: TextFormField(
-                            enableSuggestions: false,
-                            autocorrect: false,
-                            controller: passphrase,
+                            controller: secret,
                             decoration: const InputDecoration(
-                              labelText: 'Passphrase',
-                              hintText: 'eg. MySecretPassphrase',
+                              border: UnderlineInputBorder(),
+                              hintText: 'eg. 0123456789abcdef0123456789ABCDEF',
+                              labelText: 'Secret',
                             ),
-                          )),
-                  ])),
-              Card(
-                  color: Colors.teal,
-                  child: Padding(
-                      padding: const EdgeInsets.all(7),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Flexible(
-                              child: SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.3,
-                                  child: TextFormField(
-                                    controller: shares,
-                                    keyboardType: TextInputType.number,
-                                    decoration: const InputDecoration(
-                                      border: UnderlineInputBorder(),
-                                      labelText: 'Shares',
-                                    ),
-                                    validator: (value) {
-                                      if (value == null ||
-                                          int.tryParse(value) == null) {
-                                        return 'Fill with an integer';
-                                      }
-                                      return null;
-                                    },
-                                  ))),
-                          Flexible(
-                              child: SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.3,
-                                  child: TextFormField(
-                                    controller: threshold,
-                                    keyboardType: TextInputType.number,
-                                    decoration: const InputDecoration(
-                                      border: UnderlineInputBorder(),
-                                      labelText: 'Threshold',
-                                    ),
-                                    validator: (value) {
-                                      if (value == null ||
-                                          int.tryParse(value) == null) {
-                                        return 'Fill with an integer';
-                                      }
-                                      return null;
-                                    },
-                                  ))),
-                        ],
-                      ))),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  primary: Colors.white,
-                  onPrimary: Colors.teal,
-                ),
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Processing')),
-                    );
-                  }
-                  List<List<int>> scheme = [
-                    for (var i = 0; i < int.parse(shares.text); i++) [1, 1]
-                  ];
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => SharesScreen(
-                              slip: Slip39.from(scheme,
-                                  masterSecret: Uint8List.fromList(
-                                      hex.decode(secret.text)),
-                                  passphrase: passphrase.text,
-                                  threshold: int.parse(threshold.text)),
-                            )),
-                  );
-                },
-                child: const Text('Submit'),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Fill the secret with a hexadecimal string';
+                              }
+                              return null;
+                            },
+                          ))),
+                  Card(
+                      color: Colors.teal,
+                      child: Column(children: [
+                        SwitchListTile(
+                            title: const Text('Passphrase ?'),
+                            value: hasPassphrase,
+                            onChanged: (bool value) {
+                              setState(() {
+                                hasPassphrase = value;
+                              });
+                            }),
+                        if (hasPassphrase)
+                          Padding(
+                              padding: const EdgeInsets.all(7),
+                              child: TextFormField(
+                                enableSuggestions: false,
+                                autocorrect: false,
+                                controller: passphrase,
+                                decoration: const InputDecoration(
+                                  labelText: 'Passphrase',
+                                  hintText: 'eg. MySecretPassphrase',
+                                ),
+                              )),
+                      ])),
+                  Card(
+                      color: Colors.teal,
+                      child: Padding(
+                          padding: const EdgeInsets.all(7),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                  child: SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.3,
+                                      child: TextFormField(
+                                        controller: shares,
+                                        keyboardType: TextInputType.number,
+                                        decoration: const InputDecoration(
+                                          border: UnderlineInputBorder(),
+                                          labelText: 'Shares',
+                                        ),
+                                        validator: (value) {
+                                          if (value == null ||
+                                              int.tryParse(value) == null) {
+                                            return 'Fill with an integer';
+                                          }
+                                          return null;
+                                        },
+                                      ))),
+                              Flexible(
+                                  child: SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.3,
+                                      child: TextFormField(
+                                        controller: threshold,
+                                        keyboardType: TextInputType.number,
+                                        decoration: const InputDecoration(
+                                          border: UnderlineInputBorder(),
+                                          labelText: 'Threshold',
+                                        ),
+                                        validator: (value) {
+                                          if (value == null ||
+                                              int.tryParse(value) == null) {
+                                            return 'Fill with an integer';
+                                          }
+                                          return null;
+                                        },
+                                      ))),
+                            ],
+                          ))),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.white,
+                      onPrimary: Colors.teal,
+                    ),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Processing')),
+                        );
+                      }
+                      List<List<int>> scheme = [
+                        for (var i = 0; i < int.parse(shares.text); i++) [1, 1]
+                      ];
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => SharesScreen(
+                                  slip: Slip39.from(scheme,
+                                      masterSecret: Uint8List.fromList(
+                                          hex.decode(secret.text)),
+                                      passphrase: passphrase.text,
+                                      threshold: int.parse(threshold.text)),
+                                )),
+                      );
+                    },
+                    child: const Text('Submit'),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ));
+            ))));
   }
 }
