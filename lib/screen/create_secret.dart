@@ -42,26 +42,28 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
               width: 500,
               child: Column(
                 children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.white,
-                      onPrimary: Colors.teal,
-                    ),
-                    onPressed: () {
-                      var randomValues =
-                          List<int>.generate(32, (i) => random.nextInt(256));
-                      setState(() {
-                        secret.text = hex.encode(randomValues);
-                      });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                              'You should provide your own source of entropy'),
+                  Padding(
+                      padding: const EdgeInsets.only(top: 8, bottom: 3),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.white,
+                          onPrimary: Colors.teal,
                         ),
-                      );
-                    },
-                    child: const Text('Generate Random Secret (256bits)'),
-                  ),
+                        onPressed: () {
+                          var randomValues = List<int>.generate(
+                              32, (i) => random.nextInt(256));
+                          setState(() {
+                            secret.text = hex.encode(randomValues);
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  'You should provide your own source of entropy'),
+                            ),
+                          );
+                        },
+                        child: const Text('Generate Random Secret (256bits)'),
+                      )),
                   Card(
                       color: Colors.teal,
                       child: Padding(
@@ -124,12 +126,14 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                                         ),
                                         validator: (value) {
                                           if (value == null ||
+                                              value.isEmpty ||
                                               int.tryParse(value) == null) {
                                             return 'Fill with an integer';
                                           }
                                           return null;
                                         },
                                       ))),
+                              const Spacer(),
                               Flexible(
                                   child: SizedBox(
                                       width: MediaQuery.of(context).size.width *
@@ -143,6 +147,7 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                                         ),
                                         validator: (value) {
                                           if (value == null ||
+                                              value.isEmpty ||
                                               int.tryParse(value) == null) {
                                             return 'Fill with an integer';
                                           }
@@ -151,34 +156,37 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                                       ))),
                             ],
                           ))),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.white,
-                      onPrimary: Colors.teal,
-                    ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Processing')),
-                        );
-                      }
-                      List<List<int>> scheme = [
-                        for (var i = 0; i < int.parse(shares.text); i++) [1, 1]
-                      ];
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => SharesScreen(
-                                  slip: Slip39.from(scheme,
-                                      masterSecret: Uint8List.fromList(
-                                          hex.decode(secret.text)),
-                                      passphrase: passphrase.text,
-                                      threshold: int.parse(threshold.text)),
-                                )),
-                      );
-                    },
-                    child: const Text('Submit'),
-                  ),
+                  Padding(
+                      padding: const EdgeInsets.only(top: 3),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.white,
+                          onPrimary: Colors.teal,
+                        ),
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Processing')),
+                            );
+                          }
+                          List<List<int>> scheme = [
+                            for (var i = 0; i < int.parse(shares.text); i++)
+                              [1, 1]
+                          ];
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SharesScreen(
+                                      slip: Slip39.from(scheme,
+                                          masterSecret: Uint8List.fromList(
+                                              hex.decode(secret.text)),
+                                          passphrase: passphrase.text,
+                                          threshold: int.parse(threshold.text)),
+                                    )),
+                          );
+                        },
+                        child: const Text('Submit'),
+                      )),
                 ],
               ),
             ))));
