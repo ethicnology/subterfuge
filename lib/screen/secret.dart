@@ -8,12 +8,16 @@ class SecretScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text('Secret')),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Text('secret (hex): ${hex.encode(secret)}'),
-          ],
-        ));
+      appBar: AppBar(title: const Text('Secret')),
+      body: Center(
+        child: Container(
+          margin: const EdgeInsets.all(10.0),
+          padding: const EdgeInsets.all(10.0),
+          decoration:
+              BoxDecoration(border: Border.all(width: 2, color: Colors.teal)),
+          child: SelectableText(hex.encode(secret)),
+        ),
+      ),
+    );
   }
 }
