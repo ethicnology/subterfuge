@@ -10,12 +10,12 @@ class SharesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(title: const Text('Shares')),
-        body: ListView(
-            shrinkWrap: true,
-            children: List.generate(slip.groupCount, (group) {
-              return GroupWidget(
-                  number: '${group + 1}',
-                  shares: slip.fromPath('r/$group').mnemonics);
-            })));
+        body: SingleChildScrollView(
+            child: Column(
+                children: List.generate(slip.groupCount, (group) {
+          return GroupWidget(
+              number: '${group + 1}',
+              shares: slip.fromPath('r/$group').mnemonics);
+        }))));
   }
 }
