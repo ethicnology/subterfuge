@@ -27,34 +27,36 @@ class _RecoverSecretScreenState extends State<RecoverSecretScreen> {
                     width: 500,
                     child: SingleChildScrollView(
                         child: Column(children: [
-                      Card(
-                          color: Colors.teal,
-                          child: Padding(
-                            padding: const EdgeInsets.all(7),
-                            child: TextFormField(
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                border: UnderlineInputBorder(),
-                                labelText: 'Number of shares',
-                              ),
-                              validator: (value) {
-                                if (value == null ||
-                                    int.tryParse(value) == null) {
-                                  return 'Fill with an integer';
-                                }
-                                return null;
-                              },
-                              onChanged: (String value) {
-                                setState(() {
-                                  if (value == "") {
-                                    nbShares = 0;
-                                  } else {
-                                    nbShares = int.parse(value);
-                                  }
-                                });
-                              },
-                            ),
-                          )),
+                      SizedBox(
+                          width: 130,
+                          child: Card(
+                              color: Colors.teal,
+                              child: Padding(
+                                padding: const EdgeInsets.all(7),
+                                child: TextFormField(
+                                  keyboardType: TextInputType.number,
+                                  decoration: const InputDecoration(
+                                    border: UnderlineInputBorder(),
+                                    labelText: 'Shares',
+                                  ),
+                                  validator: (value) {
+                                    if (value == null ||
+                                        int.tryParse(value) == null) {
+                                      return 'Fill with an integer';
+                                    }
+                                    return null;
+                                  },
+                                  onChanged: (String value) {
+                                    setState(() {
+                                      if (value == "") {
+                                        nbShares = 0;
+                                      } else {
+                                        nbShares = int.parse(value);
+                                      }
+                                    });
+                                  },
+                                ),
+                              ))),
                       Card(
                           color: Colors.teal,
                           child: Column(children: [
@@ -97,6 +99,12 @@ class _RecoverSecretScreenState extends State<RecoverSecretScreen> {
                                     ),
                                     onChanged: (String value) {
                                       shares[i] = value;
+                                    },
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Fill with a sentence';
+                                      }
+                                      return null;
                                     },
                                   ))),
                       ElevatedButton(
