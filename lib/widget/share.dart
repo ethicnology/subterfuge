@@ -11,7 +11,6 @@ class ShareWidget extends StatelessWidget {
         color: Colors.teal,
         child: Column(
           children: [
-            Text('Share $number: '),
             SelectableText(share,
                 showCursor: true,
                 toolbarOptions: const ToolbarOptions(

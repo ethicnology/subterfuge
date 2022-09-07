@@ -12,7 +12,7 @@ class GroupWidget extends StatelessWidget {
         color: Colors.teal,
         child: Column(
           children: [
-            Text('Group $number:'),
+            Text(number),
             for (int i = 0; i < shares.length; i++)
               ShareWidget(number: '${i + 1}', share: shares[i])
           ],
