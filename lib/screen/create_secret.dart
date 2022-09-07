@@ -59,6 +59,7 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                             const SnackBar(
                               content: Text(
                                   'You should provide your own source of entropy'),
+                              backgroundColor: Colors.teal,
                             ),
                           );
                         },
@@ -165,25 +166,23 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                         ),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Processing')),
+                            List<List<int>> scheme = [
+                              for (var i = 0; i < int.parse(shares.text); i++)
+                                [1, 1]
+                            ];
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SharesScreen(
+                                        slip: Slip39.from(scheme,
+                                            masterSecret: Uint8List.fromList(
+                                                hex.decode(secret.text)),
+                                            passphrase: passphrase.text,
+                                            threshold:
+                                                int.parse(threshold.text)),
+                                      )),
                             );
                           }
-                          List<List<int>> scheme = [
-                            for (var i = 0; i < int.parse(shares.text); i++)
-                              [1, 1]
-                          ];
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SharesScreen(
-                                      slip: Slip39.from(scheme,
-                                          masterSecret: Uint8List.fromList(
-                                              hex.decode(secret.text)),
-                                          passphrase: passphrase.text,
-                                          threshold: int.parse(threshold.text)),
-                                    )),
-                          );
                         },
                         child: const Text('Submit'),
                       )),

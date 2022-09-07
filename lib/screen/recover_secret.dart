@@ -114,22 +114,19 @@ class _RecoverSecretScreenState extends State<RecoverSecretScreen> {
                         ),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Processing')),
+                            var sharesList = List<String>.from(shares.values);
+                            List<int> secret = Slip39.recoverSecret(
+                              sharesList,
+                              passphrase: passphrase,
                             );
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => SecretScreen(
+                                    secret: secret,
+                                  ),
+                                ));
                           }
-                          var sharesList = List<String>.from(shares.values);
-                          List<int> secret = Slip39.recoverSecret(
-                            sharesList,
-                            passphrase: passphrase,
-                          );
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SecretScreen(
-                                  secret: secret,
-                                ),
-                              ));
                         },
                         child: const Text('Submit'),
                       ),
