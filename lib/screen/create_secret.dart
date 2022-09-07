@@ -34,7 +34,7 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text('Create Shared Secret')),
+        appBar: AppBar(title: const Text('Share a secret')),
         body: Form(
             key: _formKey,
             child: Center(
@@ -58,7 +58,9 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text(
-                                  'You should provide your own source of entropy'),
+                                'You should provide your own source of entropy',
+                                style: TextStyle(color: Colors.white),
+                              ),
                               backgroundColor: Colors.teal,
                             ),
                           );

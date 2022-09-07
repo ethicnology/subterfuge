@@ -23,15 +23,27 @@ class DisclaimerScreen extends StatelessWidget {
           Text(
             '\n- convert maintained by dart.dev provide encoder/decoder functions',
           ),
-          SelectableText(
-            '\nsubterfuge: https://github.com/ethicnology/subterfuge',
-          ),
-          SelectableText(
-            '\nslip39: https://github.com/satoshilabs/slips/blob/master/slip-0039.md',
-          ),
-          SelectableText(
-            '\nslip39-dart: https://github.com/ilap/slip39-dart',
-          )
+          SelectableText.rich(TextSpan(children: [
+            TextSpan(
+                text: '\nsubterfuge',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            TextSpan(
+                text: ': https://github.com/ethicnology/subterfuge',
+                style: TextStyle(fontStyle: FontStyle.italic)),
+            TextSpan(
+                text: '\nslip39',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            TextSpan(
+                text:
+                    ': https://github.com/satoshilabs/slips/blob/master/slip-0039.md',
+                style: TextStyle(fontStyle: FontStyle.italic)),
+            TextSpan(
+                text: '\nslip39-dart',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            TextSpan(
+                text: ': https://github.com/ilap/slip39-dart',
+                style: TextStyle(fontStyle: FontStyle.italic)),
+          ]))
         ],
       ),
     );

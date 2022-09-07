@@ -19,7 +19,7 @@ class DisclaimerWidget extends StatelessWidget {
               MaterialPageRoute(builder: (context) => const DisclaimerScreen()),
             );
           },
-          child: const Text('OPEN'),
+          child: const Text('READ'),
         )
       ],
     );

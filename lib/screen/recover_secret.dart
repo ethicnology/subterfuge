@@ -19,7 +19,7 @@ class _RecoverSecretScreenState extends State<RecoverSecretScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text('Recover Shared Secret')),
+        appBar: AppBar(title: const Text('Recover a secret')),
         body: Form(
             key: _formKey,
             child: Center(

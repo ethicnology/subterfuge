@@ -9,11 +9,27 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text('Subterfuge')),
+        appBar: AppBar(
+            title: const Text('Subterfuge, a secret sharing experience')),
         body: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             const DisclaimerWidget(),
             const Divider(),
+            const Padding(
+                padding:
+                    EdgeInsets.only(top: 20, bottom: 25, left: 10, right: 10),
+                child: SelectableText.rich(
+                  TextSpan(text: '', children: [
+                    TextSpan(
+                      text: 'subterfuge',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(
+                        text:
+                            ': An indirect or deceptive device or stratagem. Refers especially to war and diplomatics.'),
+                  ]),
+                )),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 primary: Colors.white,
@@ -26,9 +42,9 @@ class HomeScreen extends StatelessWidget {
                       builder: (context) => const CreateSecretScreen()),
                 );
               },
-              child: const Text('Create Shared Secret'),
+              child: const Text('Share a secret'),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 25),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 primary: Colors.white,
@@ -41,7 +57,7 @@ class HomeScreen extends StatelessWidget {
                       builder: (context) => const RecoverSecretScreen()),
                 );
               },
-              child: const Text('Recover Shared Secret'),
+              child: const Text('Recover a secret'),
             ),
           ],
         ));
