@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:flutter/material.dart';
 import 'package:slip39/slip39.dart';
+import 'package:subterfuge/screen/disclaimer.dart';
 import 'package:subterfuge/screen/shares.dart';
 
 class CreateSecretScreen extends StatefulWidget {
@@ -55,15 +56,24 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                           setState(() {
                             secret.text = hex.encode(randomValues);
                           });
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'You should provide your own source of entropy',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              backgroundColor: Colors.teal,
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: const Text(
+                              'You should read the disclaimer about randomness',
+                              style: TextStyle(color: Colors.white),
                             ),
-                          );
+                            backgroundColor: Colors.teal,
+                            action: SnackBarAction(
+                              label: 'READ',
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const DisclaimerScreen()),
+                                );
+                              },
+                            ),
+                          ));
                         },
                         child: const Text('Generate Random Secret (256bits)'),
                       )),
