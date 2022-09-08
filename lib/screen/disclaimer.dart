@@ -7,12 +7,19 @@ class DisclaimerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Disclaimer')),
-      body: Column(
+      body: SingleChildScrollView(
+          child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: const [
+          Center(
+            child: Text(
+              'Dependencies',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
           Text(
-            'This application relies on few dependencies. They are listed in the pubspec.yaml under the dependencies section.',
+            'Applications relies on dependencies. These dependencies may contain bugs or vulnerabilities that I\'m not responsible for because they are developed and maintained by third parties. Subterfuge relies only on few dependencies, they are listed in the pubspec.yaml file in the root of the project repository.',
           ),
           Text(
             '\n- flutter maintained by google, the framework used to create this cross-platform app',
@@ -43,9 +50,24 @@ class DisclaimerScreen extends StatelessWidget {
             TextSpan(
                 text: ': https://github.com/ilap/slip39-dart',
                 style: TextStyle(fontStyle: FontStyle.italic)),
-          ]))
+          ])),
+          Center(
+            child: Text(
+              '\nRandomness',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Text(
+              'Randomness in computer science is a whole research field that deal with randomness in a determinist system such as a computers.'),
+          Text(
+              'The random secret generator in this program relies on Dart language "Random.secure()", it generates 32 numbers between 0 and 255 a.k.a. bytes.'),
+          Text(
+              'In my opinion, you should\'nt relies on subterfuge random generator and should find a better source of entropy such as dices, coins or true random generator…'),
+          SelectableText(
+              style: TextStyle(fontStyle: FontStyle.italic),
+              '\nhttps://engineering.mit.edu/engage/ask-an-engineer/can-a-computer-generate-a-truly-random-number/')
         ],
-      ),
+      )),
     );
   }
 }
