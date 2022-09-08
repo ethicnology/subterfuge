@@ -58,7 +58,7 @@ class DisclaimerScreen extends StatelessWidget {
             ),
           ),
           Text(
-              'Randomness in computer science is a whole research field that deal with randomness in a determinist system such as a computers.'),
+              'Randomness in computer science is a whole research field that deal with random in a determinist system such as computers.'),
           Text(
               'The random secret generator in this program relies on Dart language "Random.secure()", it generates 32 numbers between 0 and 255 a.k.a. bytes.'),
           Text(
