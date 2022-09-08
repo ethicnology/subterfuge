@@ -61,7 +61,7 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                               'You should read the disclaimer about randomness',
                               style: TextStyle(color: Colors.white),
                             ),
-                            backgroundColor: Colors.teal,
+                            backgroundColor: Colors.red,
                             action: SnackBarAction(
                               label: 'READ',
                               onPressed: () {
