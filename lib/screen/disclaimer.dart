@@ -12,10 +12,13 @@ class DisclaimerScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: const [
-          Center(
-            child: Text(
-              'Dependencies',
-              style: TextStyle(fontWeight: FontWeight.bold),
+          Padding(
+            padding: EdgeInsets.all(20),
+            child: Center(
+              child: Text(
+                'Dependencies',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ),
           Text(
@@ -30,31 +33,36 @@ class DisclaimerScreen extends StatelessWidget {
           Text(
             '\n- convert maintained by dart.dev provide encoder/decoder functions',
           ),
-          SelectableText.rich(TextSpan(children: [
-            TextSpan(
-                text: '\nsubterfuge',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            TextSpan(
-                text: ': https://github.com/ethicnology/subterfuge',
-                style: TextStyle(fontStyle: FontStyle.italic)),
-            TextSpan(
-                text: '\nslip39',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            TextSpan(
-                text:
-                    ': https://github.com/satoshilabs/slips/blob/master/slip-0039.md',
-                style: TextStyle(fontStyle: FontStyle.italic)),
-            TextSpan(
-                text: '\nslip39-dart',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            TextSpan(
-                text: ': https://github.com/ilap/slip39-dart',
-                style: TextStyle(fontStyle: FontStyle.italic)),
-          ])),
           Center(
-            child: Text(
-              '\nRandomness',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            child: SelectableText.rich(TextSpan(children: [
+              TextSpan(
+                  text: '\nsubterfuge',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                  text: ': github.com/ethicnology/subterfuge',
+                  style: TextStyle(fontStyle: FontStyle.italic)),
+              TextSpan(
+                  text: '\nslip39',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                  text:
+                      ': github.com/satoshilabs/slips/blob/master/slip-0039.md',
+                  style: TextStyle(fontStyle: FontStyle.italic)),
+              TextSpan(
+                  text: '\nslip39-dart',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              TextSpan(
+                  text: ': github.com/ilap/slip39-dart',
+                  style: TextStyle(fontStyle: FontStyle.italic)),
+            ])),
+          ),
+          Padding(
+            padding: EdgeInsets.all(20),
+            child: Center(
+              child: Text(
+                '\nRandomness',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ),
           Text(
@@ -63,9 +71,11 @@ class DisclaimerScreen extends StatelessWidget {
               'The random secret generator in this program relies on Dart language "Random.secure()", it generates 32 numbers between 0 and 255 a.k.a. bytes.'),
           Text(
               'In my opinion, you should\'nt relies on subterfuge random generator and should find a better source of entropy such as dices, coins or true random generator…'),
-          SelectableText(
-              style: TextStyle(fontStyle: FontStyle.italic),
-              '\nhttps://engineering.mit.edu/engage/ask-an-engineer/can-a-computer-generate-a-truly-random-number/')
+          Center(
+              child: SelectableText(
+            style: TextStyle(fontStyle: FontStyle.italic),
+            '\nengineering.mit.edu/engage/ask-an-engineer/can-a-computer-generate-a-truly-random-number/',
+          ))
         ],
       )),
     );
