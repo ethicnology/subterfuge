@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=subterfuge
+Comment=A Shamir secret sharing experience using SLIP39 implementation
+Exec=subterfuge 
+Icon=${SNAP}/meta/gui/subterfuge.png
+Terminal=false
+Type=Application
+Categories=Cryptography;

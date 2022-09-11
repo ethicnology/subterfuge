@@ -1,0 +1,28 @@
+name: subterfuge
+version: 1.0.0
+summary: Shamir Secret Sharing SLIP39
+description: A Shamir secret sharing experience using SLIP39 implementation.
+
+confinement: strict
+base: core18
+grade: stable
+
+slots:
+  dbus-subterfuge: 
+    interface: dbus
+    bus: session
+    name: org.ethicnology.subterfuge
+    
+apps:
+  subterfuge:
+    command: subterfuge
+    extensions: [flutter-master]
+    plugs:
+    - network
+    slots:
+      - dbus-subterfuge
+parts:
+  subterfuge:
+    source: .
+    plugin: flutter
+    flutter-target: lib/main.dart
