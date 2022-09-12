@@ -69,11 +69,17 @@ android {
 //            storePassword keystoreProperties['storePassword']
 //        }
 //    }
-//    buildTypes {
-//        release {
-//            signingConfig signingConfigs.release
-//        }
-//    }
+   buildTypes {
+       release {
+            //signingConfig signingConfigs.release
+            applicationVariants.all { variant ->
+                variant.outputs.all {
+                    def appName = "subterfuge"
+                    outputFileName = "${appName}${defaultConfig.versionName}"
+                }
+            }
+       }
+   }
 
 }
 
