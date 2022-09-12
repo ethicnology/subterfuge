@@ -1,9 +1,9 @@
-name: Build apk & appbundle
+name: Android
 
 on: [push]
 
 jobs:
-  android:
+  build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -13,8 +13,19 @@ jobs:
         java-version: '11'
     - uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.0.5'
+        channel: 'stable'
+    - run: flutter --version
     - run: flutter pub get
     - run: flutter test
     - run: flutter build apk
     - run: flutter build appbundle
+    - name: 'Upload apk'
+      uses: actions/upload-artifact@v2
+      with:
+        name: subterfuge-apk
+        path: build/app/outputs/flutter-apk/app-release.apk
+    - name: 'Upload appbundle'
+      uses: actions/upload-artifact@v2
+      with:
+        name: subterfuge-appbundle
+        path: build/app/outputs/bundle/release/app-release.aab
