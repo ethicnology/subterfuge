@@ -21,7 +21,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: subterfuge-linux
-        path: build/linux/x64/release/bundle
+        path: build/linux/x64/release/bundle/subterfuge
 
   web:
     runs-on: ubuntu-latest
@@ -48,13 +48,13 @@ jobs:
     - run: flutter --version
     - run: flutter pub get
     - run: flutter test
-    - run: flutter build apk
+    - run: flutter build apk --split-per-abi
     - run: flutter build appbundle
     - name: 'Upload apk'
       uses: actions/upload-artifact@v2
       with:
         name: subterfuge-apk
-        path: build/app/outputs/flutter-apk/app-release.apk
+        path: build/app/outputs/flutter-apk
     - name: 'Upload appbundle'
       uses: actions/upload-artifact@v2
       with:
