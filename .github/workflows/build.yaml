@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - develop
       
 jobs:
   linux:
@@ -21,7 +22,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: subterfuge-linux
-        path: build/linux/x64/release/bundle
+        path: build/linux/x64/release/bundle/subterfuge
 
   web:
     runs-on: ubuntu-latest
@@ -48,41 +49,15 @@ jobs:
     - run: flutter --version
     - run: flutter pub get
     - run: flutter test
-    - run: flutter build apk
+    - run: flutter build apk --split-per-abi
     - run: flutter build appbundle
     - name: 'Upload apk'
       uses: actions/upload-artifact@v2
       with:
         name: subterfuge-apk
-        path: build/app/outputs/flutter-apk/app-release.apk
+        path: build/app/outputs/flutter-apk
     - name: 'Upload appbundle'
       uses: actions/upload-artifact@v2
       with:
         name: subterfuge-appbundle
         path: build/app/outputs/bundle/release/app-release.aab
-
-  windows:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: subosito/flutter-action@v2
-      with:
-        channel: 'stable'
-    - run: flutter config --enable-windows-desktop
-    - run: flutter build windows
-
-  ios:
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: subosito/flutter-action@v2
-      with:
-        channel: 'stable'
-    - run: flutter pub get
-    - run: flutter test
-    - run: flutter build ios --release --no-codesign
-    - name: 'Upload iOS'
-      uses: actions/upload-artifact@v2
-      with:
-        name: subterfuge-ios
-        path: build/ios/iphoneos/Runner.app
