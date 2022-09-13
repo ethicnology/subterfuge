@@ -1,5 +1,5 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![CI](https://github.com/ethicnology/subterfuge/actions/workflows/build.yaml/badge.svg)](https://github.com/ethicnology/dart-bip39-mnemonic/actions/workflows/dart.yml)
+[![CI](https://github.com/ethicnology/subterfuge/actions/workflows/build.yaml/badge.svg)](https://github.com/ethicnology/subterfuge/actions/workflows/build.yaml)
 
 # subterfuge
 
