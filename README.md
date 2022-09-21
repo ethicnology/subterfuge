@@ -3,8 +3,8 @@
 
 # subterfuge
 
-[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/subterfuge)
-[![Get it from the Play Store](https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png)](https://play.google.com/store/apps/details?id=org.ethicnology.subterfuge)
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/subterfuge)  
+[![Get it from the Play Store](https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg)](https://play.google.com/store/apps/details?id=org.ethicnology.subterfuge)
 
 A Shamir secret sharing experience using SLIP39 implementation.
 
