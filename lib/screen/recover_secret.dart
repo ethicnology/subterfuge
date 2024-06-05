@@ -109,8 +109,7 @@ class _RecoverSecretScreenState extends State<RecoverSecretScreen> {
                                   ))),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          primary: Colors.white,
-                          onPrimary: Colors.teal,
+                          foregroundColor: Colors.teal, backgroundColor: Colors.white,
                         ),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {

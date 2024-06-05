@@ -47,8 +47,7 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                       padding: const EdgeInsets.only(top: 8, bottom: 3),
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          primary: Colors.white,
-                          onPrimary: Colors.teal,
+                          foregroundColor: Colors.teal, backgroundColor: Colors.white,
                         ),
                         onPressed: () {
                           var randomValues = List<int>.generate(
@@ -173,8 +172,7 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                       padding: const EdgeInsets.only(top: 3),
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          primary: Colors.white,
-                          onPrimary: Colors.teal,
+                          foregroundColor: Colors.teal, backgroundColor: Colors.white,
                         ),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
