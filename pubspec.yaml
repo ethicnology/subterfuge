@@ -17,7 +17,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  slip39: ^0.2.1
+  slip39: ^0.3.0
   convert: ^3.0.2
 
 dev_dependencies:
