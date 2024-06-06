@@ -16,12 +16,12 @@ class CreateSecretScreen extends StatefulWidget {
 
 class _CreateSecretScreenState extends State<CreateSecretScreen> {
   final _formKey = GlobalKey<FormState>();
-  bool hasPassphrase = false;
-  TextEditingController secret = TextEditingController();
-  TextEditingController passphrase = TextEditingController();
-  TextEditingController shares = TextEditingController();
-  TextEditingController threshold = TextEditingController();
-  var random = Random.secure();
+  final secret = TextEditingController();
+  final passphrase = TextEditingController();
+  final shares = TextEditingController();
+  final threshold = TextEditingController();
+  final random = Random.secure();
+  var hasPassphrase = false;
 
   @override
   void dispose() {
@@ -47,7 +47,8 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                       padding: const EdgeInsets.only(top: 8, bottom: 3),
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.teal, backgroundColor: Colors.white,
+                          foregroundColor: Colors.teal,
+                          backgroundColor: Colors.white,
                         ),
                         onPressed: () {
                           var randomValues = List<int>.generate(
@@ -67,8 +68,9 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) =>
-                                          const DisclaimerScreen()),
+                                    builder: (context) =>
+                                        const DisclaimerScreen(),
+                                  ),
                                 );
                               },
                             ),
@@ -98,13 +100,10 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                       color: Colors.teal,
                       child: Column(children: [
                         SwitchListTile(
-                            title: const Text('Passphrase ?'),
-                            value: hasPassphrase,
-                            onChanged: (bool value) {
-                              setState(() {
-                                hasPassphrase = value;
-                              });
-                            }),
+                          title: const Text('Passphrase ?'),
+                          value: hasPassphrase,
+                          onChanged: (v) => setState(() => hasPassphrase = v),
+                        ),
                         if (hasPassphrase)
                           Padding(
                               padding: const EdgeInsets.all(7),
@@ -172,7 +171,8 @@ class _CreateSecretScreenState extends State<CreateSecretScreen> {
                       padding: const EdgeInsets.only(top: 3),
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.teal, backgroundColor: Colors.white,
+                          foregroundColor: Colors.teal,
+                          backgroundColor: Colors.white,
                         ),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {

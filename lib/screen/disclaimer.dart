@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
 class DisclaimerScreen extends StatelessWidget {
-  const DisclaimerScreen({Key? key}) : super(key: key);
+  const DisclaimerScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Disclaimer')),
-      body: SingleChildScrollView(
+      body: const SingleChildScrollView(
           child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
+        children: [
           Padding(
             padding: EdgeInsets.all(20),
             child: Center(

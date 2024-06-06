@@ -3,7 +3,7 @@ import 'package:subterfuge/screen/secret.dart';
 import 'package:slip39/slip39.dart';
 
 class RecoverSecretScreen extends StatefulWidget {
-  const RecoverSecretScreen({Key? key}) : super(key: key);
+  const RecoverSecretScreen({super.key});
 
   @override
   State<RecoverSecretScreen> createState() => _RecoverSecretScreenState();
@@ -71,18 +71,16 @@ class _RecoverSecretScreenState extends State<RecoverSecretScreen> {
                                 }),
                             if (hasPassphrase)
                               Padding(
-                                  padding: const EdgeInsets.all(7),
-                                  child: TextFormField(
-                                    enableSuggestions: false,
-                                    autocorrect: false,
-                                    onChanged: (String value) {
-                                      setState(() {
-                                        passphrase = value;
-                                      });
-                                    },
-                                    decoration: const InputDecoration(
-                                        labelText: 'Passphrase'),
-                                  )),
+                                padding: const EdgeInsets.all(7),
+                                child: TextFormField(
+                                  enableSuggestions: false,
+                                  autocorrect: false,
+                                  onChanged: (v) =>
+                                      setState(() => passphrase = v),
+                                  decoration: const InputDecoration(
+                                      labelText: 'Passphrase'),
+                                ),
+                              ),
                           ])),
                       if (nbShares > 0)
                         for (int i = 0; i < nbShares; i++)
@@ -109,7 +107,8 @@ class _RecoverSecretScreenState extends State<RecoverSecretScreen> {
                                   ))),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.teal, backgroundColor: Colors.white,
+                          foregroundColor: Colors.teal,
+                          backgroundColor: Colors.white,
                         ),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
@@ -121,9 +120,8 @@ class _RecoverSecretScreenState extends State<RecoverSecretScreen> {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => SecretScreen(
-                                    secret: secret,
-                                  ),
+                                  builder: (context) =>
+                                      SecretScreen(secret: secret),
                                 ));
                           }
                         },
