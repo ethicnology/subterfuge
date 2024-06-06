@@ -33,8 +33,7 @@ class HomeScreen extends StatelessWidget {
                 )),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                primary: Colors.white,
-                onPrimary: Colors.teal,
+                foregroundColor: Colors.teal, backgroundColor: Colors.white,
               ),
               onPressed: () {
                 Navigator.push(
@@ -48,8 +47,7 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 25),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                primary: Colors.white,
-                onPrimary: Colors.teal,
+                foregroundColor: Colors.teal, backgroundColor: Colors.white,
               ),
               onPressed: () {
                 Navigator.push(
