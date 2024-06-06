@@ -34,7 +34,7 @@ void main() {
     expect(inputSecret, outputSecret);
   });
 
-  testWidgets('Test 3/5 without passphrase', (WidgetTester tester) async {
+  testWidgets('Test 3/5 with passphrase', (WidgetTester tester) async {
     var scheme = [
       for (var i = 0; i < 5; i++) [1, 1]
     ];
