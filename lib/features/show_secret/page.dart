@@ -1,9 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:convert/convert.dart';
 import 'package:flutter/material.dart';
 
-class SecretScreen extends StatelessWidget {
-  final List<int> secret;
-  const SecretScreen({super.key, required this.secret});
+class ShowSecretPage extends StatelessWidget {
+  final Uint8List secret;
+  const ShowSecretPage({super.key, required this.secret});
 
   @override
   Widget build(BuildContext context) {

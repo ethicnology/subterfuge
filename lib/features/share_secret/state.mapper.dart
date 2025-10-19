@@ -35,13 +35,6 @@ class ShareSecretStateMapper extends ClassMapperBase<ShareSecretState> {
     opt: true,
     def: const [],
   );
-  static bool _$hasPassphrase(ShareSecretState v) => v.hasPassphrase;
-  static const Field<ShareSecretState, bool> _f$hasPassphrase = Field(
-    'hasPassphrase',
-    _$hasPassphrase,
-    opt: true,
-    def: false,
-  );
   static AppError? _$error(ShareSecretState v) => v.error;
   static const Field<ShareSecretState, AppError> _f$error = Field(
     'error',
@@ -53,7 +46,6 @@ class ShareSecretStateMapper extends ClassMapperBase<ShareSecretState> {
   final MappableFields<ShareSecretState> fields = const {
     #isLoading: _f$isLoading,
     #shares: _f$shares,
-    #hasPassphrase: _f$hasPassphrase,
     #error: _f$error,
   };
 
@@ -61,7 +53,6 @@ class ShareSecretStateMapper extends ClassMapperBase<ShareSecretState> {
     return ShareSecretState(
       isLoading: data.dec(_f$isLoading),
       shares: data.dec(_f$shares),
-      hasPassphrase: data.dec(_f$hasPassphrase),
       error: data.dec(_f$error),
     );
   }
@@ -129,12 +120,7 @@ extension ShareSecretStateValueCopy<$R, $Out>
 abstract class ShareSecretStateCopyWith<$R, $In extends ShareSecretState, $Out>
     implements ClassCopyWith<$R, $In, $Out> {
   ListCopyWith<$R, String, ObjectCopyWith<$R, String, String>> get shares;
-  $R call({
-    bool? isLoading,
-    List<String>? shares,
-    bool? hasPassphrase,
-    AppError? error,
-  });
+  $R call({bool? isLoading, List<String>? shares, AppError? error});
   ShareSecretStateCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(
     Then<$Out2, $R2> t,
   );
@@ -156,24 +142,18 @@ class _ShareSecretStateCopyWithImpl<$R, $Out>
         (v) => call(shares: v),
       );
   @override
-  $R call({
-    bool? isLoading,
-    List<String>? shares,
-    bool? hasPassphrase,
-    Object? error = $none,
-  }) => $apply(
-    FieldCopyWithData({
-      if (isLoading != null) #isLoading: isLoading,
-      if (shares != null) #shares: shares,
-      if (hasPassphrase != null) #hasPassphrase: hasPassphrase,
-      if (error != $none) #error: error,
-    }),
-  );
+  $R call({bool? isLoading, List<String>? shares, Object? error = $none}) =>
+      $apply(
+        FieldCopyWithData({
+          if (isLoading != null) #isLoading: isLoading,
+          if (shares != null) #shares: shares,
+          if (error != $none) #error: error,
+        }),
+      );
   @override
   ShareSecretState $make(CopyWithData data) => ShareSecretState(
     isLoading: data.get(#isLoading, or: $value.isLoading),
     shares: data.get(#shares, or: $value.shares),
-    hasPassphrase: data.get(#hasPassphrase, or: $value.hasPassphrase),
     error: data.get(#error, or: $value.error),
   );
 

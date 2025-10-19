@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:subterfuge/screen/disclaimer.dart';
+import 'package:subterfuge/features/disclaimer/page.dart';
 
-class DisclaimerWidget extends StatelessWidget {
-  const DisclaimerWidget({super.key});
+class DisclaimerBanner extends StatelessWidget {
+  const DisclaimerBanner({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +16,7 @@ class DisclaimerWidget extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const DisclaimerScreen()),
+              MaterialPageRoute(builder: (context) => const DisclaimerPage()),
             );
           },
           child: const Text('READ'),

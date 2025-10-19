@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:subterfuge/screen/home.dart';
+import 'package:subterfuge/features/home/page.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -11,9 +9,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Subterfuge',
       theme: ThemeData.dark(),
-      home: const HomeScreen(),
+      home: const HomePage(),
     );
   }
 }

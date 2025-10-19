@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:subterfuge/screen/create_secret.dart';
-import 'package:subterfuge/screen/recover_secret.dart';
-import 'package:subterfuge/widget/disclaimer.dart';
+import 'package:subterfuge/features/combine_shares/page.dart';
+import 'package:subterfuge/features/share_secret/page.dart';
+import 'package:subterfuge/features/home/disclaimer_banner.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,7 @@ class HomeScreen extends StatelessWidget {
             child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            const DisclaimerWidget(),
+            const DisclaimerBanner(),
             const Divider(),
             const Padding(
                 padding:
@@ -33,13 +33,14 @@ class HomeScreen extends StatelessWidget {
                 )),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.teal, backgroundColor: Colors.white,
+                foregroundColor: Colors.teal,
+                backgroundColor: Colors.white,
               ),
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const CreateSecretScreen()),
+                      builder: (context) => const ShareSecretPage()),
                 );
               },
               child: const Text('Share a secret'),
@@ -47,13 +48,14 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 25),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.teal, backgroundColor: Colors.white,
+                foregroundColor: Colors.teal,
+                backgroundColor: Colors.white,
               ),
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const RecoverSecretScreen()),
+                      builder: (context) => const CombineSharesPage()),
                 );
               },
               child: const Text('Recover a secret'),

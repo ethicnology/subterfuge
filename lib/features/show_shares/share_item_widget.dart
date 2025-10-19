@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class ShareWidget extends StatelessWidget {
+class ShareItemWidget extends StatelessWidget {
   final String number;
   final String share;
-  const ShareWidget({super.key, required this.number, required this.share});
+  const ShareItemWidget({super.key, required this.number, required this.share});
 
   @override
   Widget build(BuildContext context) {

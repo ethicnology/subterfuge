@@ -1,5 +1,6 @@
 # Miscellaneous
 .fvm/
+*.mapper.dart
 
 *.class
 *.log
@@ -7,9 +8,11 @@
 *.swp
 .DS_Store
 .atom/
+.build/
 .buildlog/
 .history
 .svn/
+.swiftpm/
 migrate_working_dir/
 
 # IntelliJ related
@@ -47,3 +50,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# FVM Version Cache
+.fvm/
+*.mapper.dart
