@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:subterfuge/features/combine_shares/page.dart';
+import 'package:subterfuge/features/import_mnemonic/page.dart';
 import 'package:subterfuge/features/share_secret/page.dart';
 import 'package:subterfuge/features/home/disclaimer_banner.dart';
 
@@ -31,34 +32,58 @@ class HomePage extends StatelessWidget {
                             ': An indirect or deceptive device or stratagem. Refers especially to war and diplomatics.'),
                   ]),
                 )),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.teal,
-                backgroundColor: Colors.white,
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const ShareSecretPage()),
-                );
-              },
-              child: const Text('Share a secret'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.teal,
+                    backgroundColor: Colors.white,
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ShareSecretPage()),
+                    );
+                  },
+                  child: const Text('Share a seed'),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.teal,
+                    backgroundColor: Colors.white,
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const CombineSharesPage()),
+                    );
+                  },
+                  child: const Text('Assemble a seed'),
+                ),
+              ],
             ),
             const SizedBox(height: 25),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.teal,
-                backgroundColor: Colors.white,
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const CombineSharesPage()),
-                );
-              },
-              child: const Text('Recover a secret'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.teal,
+                    backgroundColor: Colors.white,
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ImportMnemonicPage()),
+                    );
+                  },
+                  child: const Text('Share a mnemonic'),
+                ),
+              ],
             ),
             const SizedBox(height: 25),
             const SizedBox(
