@@ -152,16 +152,10 @@ class _MnemonicWidgetState extends State<MnemonicWidget> {
           ],
           if (_error != null) ...[
             const SizedBox(height: 16),
-            Text(
-              _error!.toString(),
-              style: const TextStyle(color: Colors.red),
-            ),
+            Text(_error!.toString(), style: const TextStyle(color: Colors.red)),
           ],
           const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: onSubmit,
-            child: Text('Submit'),
-          ),
+          ElevatedButton(onPressed: onSubmit, child: Text('Submit')),
         ],
       ),
     );
@@ -218,9 +212,10 @@ class MnemonicWordState extends State<MnemonicWord> {
             width: 35,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: widget.word.isEmpty
-                  ? Colors.black
-                  : isValidWord
+              color:
+                  widget.word.isEmpty
+                      ? Colors.black
+                      : isValidWord
                       ? Colors.green
                       : Colors.red,
               borderRadius: BorderRadius.circular(4),
@@ -320,13 +315,13 @@ class _MnemonicSentenceWidgetState extends State<MnemonicSentenceWidget> {
   void _initializeFocusNodes() {
     focusNodes = List.generate(
       widget.words.length,
-      (index) => FocusNode()
-        ..addListener(() {
-          final focusedIndex = focusNodes.indexWhere((node) => node.hasFocus);
-          if (focusedIndex != -1 && _focusedDisplayIndex != focusedIndex) {
-            setState(() => _focusedDisplayIndex = focusedIndex);
-          }
-        }),
+      (index) =>
+          FocusNode()..addListener(() {
+            final focusedIndex = focusNodes.indexWhere((node) => node.hasFocus);
+            if (focusedIndex != -1 && _focusedDisplayIndex != focusedIndex) {
+              setState(() => _focusedDisplayIndex = focusedIndex);
+            }
+          }),
     );
   }
 
@@ -373,7 +368,7 @@ class _MnemonicSentenceWidgetState extends State<MnemonicSentenceWidget> {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: hints.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 16),
+        separatorBuilder: (_, _) => const SizedBox(width: 16),
         itemBuilder: (context, index) {
           final hint = hints.elementAt(index);
           return _HintChip(word: hint, onTap: () => _onHintTap(hint));
@@ -404,34 +399,36 @@ class _MnemonicSentenceWidgetState extends State<MnemonicSentenceWidget> {
             Expanded(
               child: Column(
                 spacing: 16,
-                children: leftWords
-                    .map(
-                      (entry) => MnemonicWord(
-                        index: entry.index,
-                        word: entry.word,
-                        onWordChanged: widget.onWordChanged,
-                        focusNode: focusNodes[entry.index],
-                        onComplete: () => _focusNext(entry.index + 1),
-                      ),
-                    )
-                    .toList(),
+                children:
+                    leftWords
+                        .map(
+                          (entry) => MnemonicWord(
+                            index: entry.index,
+                            word: entry.word,
+                            onWordChanged: widget.onWordChanged,
+                            focusNode: focusNodes[entry.index],
+                            onComplete: () => _focusNext(entry.index + 1),
+                          ),
+                        )
+                        .toList(),
               ),
             ),
             Expanded(
               child: Column(
                 spacing: 16,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: rightWords
-                    .map(
-                      (entry) => MnemonicWord(
-                        index: entry.index,
-                        word: entry.word,
-                        onWordChanged: widget.onWordChanged,
-                        focusNode: focusNodes[entry.index],
-                        onComplete: () => _focusNext(entry.index + 1),
-                      ),
-                    )
-                    .toList(),
+                children:
+                    rightWords
+                        .map(
+                          (entry) => MnemonicWord(
+                            index: entry.index,
+                            word: entry.word,
+                            onWordChanged: widget.onWordChanged,
+                            focusNode: focusNodes[entry.index],
+                            onComplete: () => _focusNext(entry.index + 1),
+                          ),
+                        )
+                        .toList(),
               ),
             ),
           ],
@@ -472,17 +469,18 @@ class MnemonicLengthDropdown extends StatelessWidget {
         iconEnabledColor: Colors.black,
         focusColor: Colors.teal,
         dropdownColor: Colors.white,
-        items: bip39.MnemonicLength.values
-            .map(
-              (length) => DropdownMenuItem(
-                value: length,
-                child: Text(
-                  '${length.words} words',
-                  style: const TextStyle(color: Colors.black),
-                ),
-              ),
-            )
-            .toList(),
+        items:
+            bip39.MnemonicLength.values
+                .map(
+                  (length) => DropdownMenuItem(
+                    value: length,
+                    child: Text(
+                      '${length.words} words',
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                  ),
+                )
+                .toList(),
         onChanged: (v) => onChanged(v ?? bip39.MnemonicLength.words12),
       ),
     );
@@ -543,17 +541,18 @@ class MnemonicLanguageDropdown extends StatelessWidget {
         underline: const SizedBox(),
         borderRadius: BorderRadius.circular(4),
         isExpanded: true,
-        items: bip39.Language.values
-            .map(
-              (language) => DropdownMenuItem(
-                value: language,
-                child: Text(
-                  _getLanguageDisplayName(language),
-                  style: const TextStyle(color: Colors.black),
-                ),
-              ),
-            )
-            .toList(),
+        items:
+            bip39.Language.values
+                .map(
+                  (language) => DropdownMenuItem(
+                    value: language,
+                    child: Text(
+                      _getLanguageDisplayName(language),
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                  ),
+                )
+                .toList(),
         onChanged: (v) => onChanged(v ?? bip39.Language.english),
       ),
     );
@@ -578,10 +577,7 @@ class _HintChip extends StatelessWidget {
           color: Colors.white,
         ),
         child: Center(
-          child: Text(
-            word,
-            style: const TextStyle(color: Colors.black),
-          ),
+          child: Text(word, style: const TextStyle(color: Colors.black)),
         ),
       ),
     );

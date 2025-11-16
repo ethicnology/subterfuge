@@ -11,14 +11,15 @@ class ShareItemWidget extends StatelessWidget {
         color: Colors.teal,
         child: Column(
           children: [
-            SelectableText(share,
-                showCursor: true,
-                toolbarOptions: const ToolbarOptions(
-                  copy: true,
-                  selectAll: true,
-                  cut: false,
-                  paste: false,
-                ))
+            SelectableText(
+              share,
+              showCursor: true,
+              contextMenuBuilder: (context, editableTextState) {
+                return AdaptiveTextSelectionToolbar.editableText(
+                  editableTextState: editableTextState,
+                );
+              },
+            )
           ],
         ));
   }
