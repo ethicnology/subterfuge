@@ -20,7 +20,7 @@ class DisclaimerBanner extends StatelessWidget {
             );
           },
           child: const Text('READ'),
-        )
+        ),
       ],
     );
   }

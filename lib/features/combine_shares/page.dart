@@ -21,9 +21,10 @@ class _RecoverSecretScreenState extends State<CombineSharesPage> {
     return BlocProvider(
       create: (context) => CombineSharesCubit(),
       child: BlocConsumer<CombineSharesCubit, CombineSharesState>(
-        listenWhen: (previous, current) =>
-            previous.secret == null && current.secret != null ||
-            previous.error != null && current.error == null,
+        listenWhen:
+            (previous, current) =>
+                previous.secret == null && current.secret != null ||
+                previous.error != null && current.error == null,
         listener: (context, state) {
           final cubit = context.read<CombineSharesCubit>();
 
@@ -55,92 +56,96 @@ class _RecoverSecretScreenState extends State<CombineSharesPage> {
                 child: SizedBox(
                   width: 500,
                   child: SingleChildScrollView(
-                    child: Column(children: [
-                      SizedBox(
+                    child: Column(
+                      children: [
+                        SizedBox(
                           width: 130,
                           child: Card(
-                              color: Colors.teal,
+                            child: Padding(
+                              padding: const EdgeInsets.all(7),
+                              child: TextFormField(
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  border: UnderlineInputBorder(),
+                                  labelText: 'Shares',
+                                ),
+                                validator: (value) {
+                                  if (value == null ||
+                                      int.tryParse(value) == null) {
+                                    return 'Fill with an integer';
+                                  }
+                                  return null;
+                                },
+                                onChanged: (String value) {
+                                  final count = int.tryParse(value) ?? 0;
+                                  cubit.setSharesCount(count);
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                        Card(
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(7),
+                                child: TextFormField(
+                                  enableSuggestions: false,
+                                  autocorrect: false,
+                                  controller: passphraseController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Passphrase (optional)',
+                                    hintText: 'eg. MySecretPassphrase',
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (state.sharesCount > 0)
+                          for (int i = 0; i < state.sharesCount; i++)
+                            Card(
                               child: Padding(
                                 padding: const EdgeInsets.all(7),
                                 child: TextFormField(
-                                  keyboardType: TextInputType.number,
-                                  decoration: const InputDecoration(
-                                    border: UnderlineInputBorder(),
-                                    labelText: 'Shares',
+                                  controller: shareControllers.putIfAbsent(
+                                    i,
+                                    () => TextEditingController(),
+                                  ),
+                                  keyboardType: TextInputType.multiline,
+                                  maxLines: null,
+                                  decoration: InputDecoration(
+                                    border: const UnderlineInputBorder(),
+                                    labelText: 'shares ${i + 1}',
                                   ),
                                   validator: (value) {
-                                    if (value == null ||
-                                        int.tryParse(value) == null) {
-                                      return 'Fill with an integer';
+                                    if (value == null || value.isEmpty) {
+                                      return 'Fill with a sentence';
                                     }
                                     return null;
                                   },
-                                  onChanged: (String value) {
-                                    final count = int.tryParse(value) ?? 0;
-                                    cubit.setSharesCount(count);
-                                  },
-                                ),
-                              ))),
-                      Card(
-                          color: Colors.teal,
-                          child: Column(children: [
-                            Padding(
-                              padding: const EdgeInsets.all(7),
-                              child: TextFormField(
-                                enableSuggestions: false,
-                                autocorrect: false,
-                                controller: passphraseController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Passphrase (optional)',
-                                  hintText: 'eg. MySecretPassphrase',
                                 ),
                               ),
                             ),
-                          ])),
-                      if (state.sharesCount > 0)
-                        for (int i = 0; i < state.sharesCount; i++)
-                          Card(
-                              color: Colors.teal,
-                              child: Padding(
-                                  padding: const EdgeInsets.all(7),
-                                  child: TextFormField(
-                                    controller: shareControllers.putIfAbsent(
-                                        i, () => TextEditingController()),
-                                    keyboardType: TextInputType.multiline,
-                                    maxLines: null,
-                                    decoration: InputDecoration(
-                                      border: const UnderlineInputBorder(),
-                                      labelText: 'shares ${i + 1}',
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Fill with a sentence';
-                                      }
-                                      return null;
-                                    },
-                                  ))),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.teal,
-                          backgroundColor: Colors.white,
-                        ),
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            final shares = <int, String>{};
-                            for (int i = 0; i < state.sharesCount; i++) {
-                              shares[i] = shareControllers[i]?.text ?? '';
-                            }
+                        ElevatedButton(
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              final shares = <int, String>{};
+                              for (int i = 0; i < state.sharesCount; i++) {
+                                shares[i] = shareControllers[i]?.text ?? '';
+                              }
 
-                            cubit.combineShares(
-                              sharesCount: state.sharesCount,
-                              shares: shares,
-                              passphrase: passphraseController.text.trim(),
-                            );
-                          }
-                        },
-                        child: const Text('Submit'),
-                      ),
-                    ]),
+                              cubit.combineShares(
+                                sharesCount: state.sharesCount,
+                                shares: shares,
+                                passphrase: passphraseController.text.trim(),
+                              );
+                            }
+                          },
+                          child: const Text('Submit'),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

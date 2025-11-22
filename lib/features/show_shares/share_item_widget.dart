@@ -8,19 +8,19 @@ class ShareItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-        color: Colors.teal,
-        child: Column(
-          children: [
-            SelectableText(
-              share,
-              showCursor: true,
-              contextMenuBuilder: (context, editableTextState) {
-                return AdaptiveTextSelectionToolbar.editableText(
-                  editableTextState: editableTextState,
-                );
-              },
-            )
-          ],
-        ));
+      child: Column(
+        children: [
+          SelectableText(
+            share,
+            showCursor: true,
+            contextMenuBuilder: (context, editableTextState) {
+              return AdaptiveTextSelectionToolbar.editableText(
+                editableTextState: editableTextState,
+              );
+            },
+          ),
+        ],
+      ),
+    );
   }
 }
