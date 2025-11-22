@@ -187,10 +187,9 @@ class _ShareSecretState extends State<ShareSecretPage> {
                           ),
                         ),
                       ),
-
                       Padding(
                         padding: const .only(top: 3),
-                        child: ElevatedButton(
+                        child: FilledButton(
                           onPressed: state.isLoading
                               ? null
                               : () {

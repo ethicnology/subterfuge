@@ -22,17 +22,9 @@ class ShareItemWidget extends StatelessWidget {
               },
             ),
             const SizedBox(height: 12),
-            FilledButton.icon(
+            OutlinedButton.icon(
               onPressed: () async {
                 await Clipboard.setData(ClipboardData(text: share));
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Copied to clipboard'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                }
               },
               icon: const Icon(Icons.copy),
               label: const Text('Copy'),

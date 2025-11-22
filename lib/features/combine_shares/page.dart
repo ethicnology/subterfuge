@@ -21,10 +21,9 @@ class _RecoverSecretScreenState extends State<CombineSharesPage> {
     return BlocProvider(
       create: (context) => CombineSharesCubit(),
       child: BlocConsumer<CombineSharesCubit, CombineSharesState>(
-        listenWhen:
-            (previous, current) =>
-                previous.secret == null && current.secret != null ||
-                previous.error != null && current.error == null,
+        listenWhen: (previous, current) =>
+            previous.secret == null && current.secret != null ||
+            previous.error != null && current.error == null,
         listener: (context, state) {
           final cubit = context.read<CombineSharesCubit>();
 
@@ -127,7 +126,7 @@ class _RecoverSecretScreenState extends State<CombineSharesPage> {
                                 ),
                               ),
                             ),
-                        ElevatedButton(
+                        FilledButton(
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
                               final shares = <int, String>{};

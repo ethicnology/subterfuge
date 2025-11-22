@@ -16,14 +16,14 @@ class ShowSharesPage extends StatelessWidget {
           children: [
             ...List.generate(shares.length, (index) {
               return SharesWidget(
-                  number: '${index + 1}', shares: [shares[index]]);
+                number: '${index + 1}',
+                shares: [shares[index]],
+              );
             }),
-            ElevatedButton(
+            FilledButton(
               onPressed: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const HomePage(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const HomePage()),
                 );
               },
               child: const Text('Done'),

@@ -39,7 +39,7 @@ class HomePage extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  ElevatedButton(
+                  FilledButton(
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -50,7 +50,7 @@ class HomePage extends StatelessWidget {
                     },
                     child: const Text('Share'),
                   ),
-                  ElevatedButton(
+                  FilledButton(
                     onPressed: () {
                       Navigator.push(
                         context,
