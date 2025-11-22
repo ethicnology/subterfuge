@@ -124,16 +124,12 @@ class _MnemonicWidgetState extends State<MnemonicWidget> {
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: Colors.teal),
-                color: Colors.white,
+                border: Border.all(),
               ),
               height: 45,
               child: TextField(
-                style: const TextStyle(color: Colors.black),
-                cursorColor: Colors.teal,
                 decoration: const InputDecoration(
                   labelText: 'Passphrase (optional)',
-                  labelStyle: TextStyle(color: Colors.black),
                   contentPadding: EdgeInsets.only(right: 8),
                   border: OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.transparent),
@@ -199,11 +195,7 @@ class MnemonicWordState extends State<MnemonicWord> {
 
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: Colors.teal),
-        color: Colors.white,
-      ),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(4)),
       height: 45,
       child: Row(
         children: [
@@ -212,12 +204,11 @@ class MnemonicWordState extends State<MnemonicWord> {
             width: 35,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color:
-                  widget.word.isEmpty
-                      ? Colors.black
-                      : isValidWord
-                      ? Colors.green
-                      : Colors.red,
+              color: widget.word.isEmpty
+                  ? Colors.black
+                  : isValidWord
+                  ? Colors.green
+                  : Colors.red,
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(displayIndex),
@@ -233,8 +224,6 @@ class MnemonicWordState extends State<MnemonicWord> {
                   word: _controller.text,
                 ));
               },
-              style: const TextStyle(color: Colors.black),
-              cursorColor: Colors.teal,
               focusNode: widget.focusNode,
               clipBehavior: Clip.antiAliasWithSaveLayer,
               onEditingComplete: widget.onComplete,
@@ -258,7 +247,7 @@ class MnemonicWordState extends State<MnemonicWord> {
                 _controller.clear();
                 widget.onWordChanged((index: widget.index, word: ''));
               },
-              icon: const Icon(Icons.close, size: 24, color: Colors.black),
+              icon: const Icon(Icons.close, size: 24),
               padding: EdgeInsets.zero,
             ),
         ],
@@ -315,13 +304,13 @@ class _MnemonicSentenceWidgetState extends State<MnemonicSentenceWidget> {
   void _initializeFocusNodes() {
     focusNodes = List.generate(
       widget.words.length,
-      (index) =>
-          FocusNode()..addListener(() {
-            final focusedIndex = focusNodes.indexWhere((node) => node.hasFocus);
-            if (focusedIndex != -1 && _focusedDisplayIndex != focusedIndex) {
-              setState(() => _focusedDisplayIndex = focusedIndex);
-            }
-          }),
+      (index) => FocusNode()
+        ..addListener(() {
+          final focusedIndex = focusNodes.indexWhere((node) => node.hasFocus);
+          if (focusedIndex != -1 && _focusedDisplayIndex != focusedIndex) {
+            setState(() => _focusedDisplayIndex = focusedIndex);
+          }
+        }),
     );
   }
 
@@ -379,8 +368,8 @@ class _MnemonicSentenceWidgetState extends State<MnemonicSentenceWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final splitIndex =
-        (widget.words.length / MnemonicSentenceWidget.columns).floor();
+    final splitIndex = (widget.words.length / MnemonicSentenceWidget.columns)
+        .floor();
     final leftWords = List.generate(
       splitIndex,
       (i) => (index: i, word: widget.words[i]),
@@ -399,36 +388,34 @@ class _MnemonicSentenceWidgetState extends State<MnemonicSentenceWidget> {
             Expanded(
               child: Column(
                 spacing: 16,
-                children:
-                    leftWords
-                        .map(
-                          (entry) => MnemonicWord(
-                            index: entry.index,
-                            word: entry.word,
-                            onWordChanged: widget.onWordChanged,
-                            focusNode: focusNodes[entry.index],
-                            onComplete: () => _focusNext(entry.index + 1),
-                          ),
-                        )
-                        .toList(),
+                children: leftWords
+                    .map(
+                      (entry) => MnemonicWord(
+                        index: entry.index,
+                        word: entry.word,
+                        onWordChanged: widget.onWordChanged,
+                        focusNode: focusNodes[entry.index],
+                        onComplete: () => _focusNext(entry.index + 1),
+                      ),
+                    )
+                    .toList(),
               ),
             ),
             Expanded(
               child: Column(
                 spacing: 16,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children:
-                    rightWords
-                        .map(
-                          (entry) => MnemonicWord(
-                            index: entry.index,
-                            word: entry.word,
-                            onWordChanged: widget.onWordChanged,
-                            focusNode: focusNodes[entry.index],
-                            onComplete: () => _focusNext(entry.index + 1),
-                          ),
-                        )
-                        .toList(),
+                children: rightWords
+                    .map(
+                      (entry) => MnemonicWord(
+                        index: entry.index,
+                        word: entry.word,
+                        onWordChanged: widget.onWordChanged,
+                        focusNode: focusNodes[entry.index],
+                        onComplete: () => _focusNext(entry.index + 1),
+                      ),
+                    )
+                    .toList(),
               ),
             ),
           ],
@@ -456,31 +443,20 @@ class MnemonicLengthDropdown extends StatelessWidget {
       width: 130,
       height: 45,
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: Colors.teal),
-        color: Colors.white,
-      ),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(4)),
       child: DropdownButton<bip39.MnemonicLength>(
         value: value,
         underline: const SizedBox(),
         borderRadius: BorderRadius.circular(4),
         isExpanded: true,
-        iconEnabledColor: Colors.black,
-        focusColor: Colors.teal,
-        dropdownColor: Colors.white,
-        items:
-            bip39.MnemonicLength.values
-                .map(
-                  (length) => DropdownMenuItem(
-                    value: length,
-                    child: Text(
-                      '${length.words} words',
-                      style: const TextStyle(color: Colors.black),
-                    ),
-                  ),
-                )
-                .toList(),
+        items: bip39.MnemonicLength.values
+            .map(
+              (length) => DropdownMenuItem(
+                value: length,
+                child: Text('${length.words} words'),
+              ),
+            )
+            .toList(),
         onChanged: (v) => onChanged(v ?? bip39.MnemonicLength.words12),
       ),
     );
@@ -530,29 +506,21 @@ class MnemonicLanguageDropdown extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: Colors.teal),
-        color: Colors.white,
+        border: Border.all(),
       ),
       child: DropdownButton<bip39.Language>(
-        dropdownColor: Colors.white,
-        iconEnabledColor: Colors.black,
-        focusColor: Colors.teal,
         value: value,
         underline: const SizedBox(),
         borderRadius: BorderRadius.circular(4),
         isExpanded: true,
-        items:
-            bip39.Language.values
-                .map(
-                  (language) => DropdownMenuItem(
-                    value: language,
-                    child: Text(
-                      _getLanguageDisplayName(language),
-                      style: const TextStyle(color: Colors.black),
-                    ),
-                  ),
-                )
-                .toList(),
+        items: bip39.Language.values
+            .map(
+              (language) => DropdownMenuItem(
+                value: language,
+                child: Text(_getLanguageDisplayName(language)),
+              ),
+            )
+            .toList(),
         onChanged: (v) => onChanged(v ?? bip39.Language.english),
       ),
     );
@@ -571,14 +539,8 @@ class _HintChip extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: Colors.teal),
-          color: Colors.white,
-        ),
-        child: Center(
-          child: Text(word, style: const TextStyle(color: Colors.black)),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(4)),
+        child: Center(child: Text(word)),
       ),
     );
   }

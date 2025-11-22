@@ -13,7 +13,7 @@ class ShareSecretCubit extends Cubit<ShareSecretState> {
     required Uint8List masterSecret,
     required String passphrase,
   }) {
-    emit(state.copyWith(isLoading: true));
+    emit(state.copyWith(shares: [], error: null, isLoading: true));
 
     try {
       final secretShares = Slip39Facade.share(

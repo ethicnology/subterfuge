@@ -9,12 +9,15 @@ class SharesWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: Column(
-        children: [
-          Text(number),
-          for (int i = 0; i < shares.length; i++)
-            ShareItemWidget(number: '${i + 1}', share: shares[i]),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          children: [
+            Text('Participant $number'),
+            for (int i = 0; i < shares.length; i++)
+              ShareItemWidget(share: shares[i]),
+          ],
+        ),
       ),
     );
   }

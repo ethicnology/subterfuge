@@ -37,10 +37,9 @@ class _ShareSecretState extends State<ShareSecretPage> {
     return BlocProvider(
       create: (context) => ShareSecretCubit(),
       child: BlocConsumer<ShareSecretCubit, ShareSecretState>(
-        listenWhen:
-            (previous, current) =>
-                previous.shares.isEmpty && current.shares.isNotEmpty ||
-                previous.error != null && current.error == null,
+        listenWhen: (previous, current) =>
+            previous.shares.isEmpty && current.shares.isNotEmpty ||
+            previous.error != current.error,
         listener: (context, state) {
           final cubit = context.read<ShareSecretCubit>();
 
@@ -75,9 +74,10 @@ class _ShareSecretState extends State<ShareSecretPage> {
                     children: [
                       Card(
                         child: Padding(
-                          padding: const EdgeInsets.all(7),
+                          padding: const .all(7),
                           child: TextFormField(
                             controller: secret,
+                            autovalidateMode: .onUserInteraction,
                             decoration: const InputDecoration(
                               border: UnderlineInputBorder(),
                               hintText: 'eg. 0123456789abcdef0123456789ABCDEF',
@@ -85,7 +85,18 @@ class _ShareSecretState extends State<ShareSecretPage> {
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Fill the secret with a hexadecimal string';
+                                return 'Hexadecimal seed';
+                              }
+                              if (value.length < 32) {
+                                return 'At least 32 characters (16 bytes)';
+                              }
+                              if (!((value.length % 2) == 0)) {
+                                return 'Not an even number of characters';
+                              }
+                              try {
+                                hex.decode(value);
+                              } catch (e) {
+                                return 'Invalid hexadecimal seed';
                               }
                               return null;
                             },
@@ -96,14 +107,15 @@ class _ShareSecretState extends State<ShareSecretPage> {
                         child: Column(
                           children: [
                             Padding(
-                              padding: const EdgeInsets.all(7),
+                              padding: const .all(7),
                               child: TextFormField(
                                 enableSuggestions: false,
                                 autocorrect: false,
                                 controller: passphrase,
                                 decoration: const InputDecoration(
                                   labelText: 'Passphrase (optional)',
-                                  hintText: 'eg. MySecretPassphrase',
+                                  hintText:
+                                      'eg. DoNotInputYourMnemonicPassphrase',
                                 ),
                               ),
                             ),
@@ -112,9 +124,9 @@ class _ShareSecretState extends State<ShareSecretPage> {
                       ),
                       Card(
                         child: Padding(
-                          padding: const EdgeInsets.all(7),
+                          padding: const .all(7),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: .spaceBetween,
                             children: [
                               Flexible(
                                 child: SizedBox(
@@ -122,16 +134,21 @@ class _ShareSecretState extends State<ShareSecretPage> {
                                       MediaQuery.of(context).size.width * 0.3,
                                   child: TextFormField(
                                     controller: participants,
-                                    keyboardType: TextInputType.number,
+                                    keyboardType: .number,
                                     decoration: const InputDecoration(
                                       border: UnderlineInputBorder(),
                                       labelText: 'Participants',
                                     ),
+                                    autovalidateMode: .onUserInteraction,
                                     validator: (value) {
                                       if (value == null ||
                                           value.isEmpty ||
                                           int.tryParse(value) == null) {
-                                        return 'Fill with an integer';
+                                        return 'Between 1 and 16';
+                                      }
+                                      if (int.parse(value) < 1 ||
+                                          int.parse(value) > 16) {
+                                        return 'Between 1 and 16';
                                       }
                                       return null;
                                     },
@@ -145,16 +162,21 @@ class _ShareSecretState extends State<ShareSecretPage> {
                                       MediaQuery.of(context).size.width * 0.3,
                                   child: TextFormField(
                                     controller: threshold,
-                                    keyboardType: TextInputType.number,
+                                    keyboardType: .number,
                                     decoration: const InputDecoration(
                                       border: UnderlineInputBorder(),
                                       labelText: 'Threshold',
                                     ),
+                                    autovalidateMode: .onUserInteraction,
                                     validator: (value) {
                                       if (value == null ||
                                           value.isEmpty ||
                                           int.tryParse(value) == null) {
-                                        return 'Fill with an integer';
+                                        return 'Between 1 and 16';
+                                      }
+                                      if (int.parse(value) < 1 ||
+                                          int.parse(value) > 16) {
+                                        return 'Between 1 and 16';
                                       }
                                       return null;
                                     },
@@ -165,26 +187,26 @@ class _ShareSecretState extends State<ShareSecretPage> {
                           ),
                         ),
                       ),
+
                       Padding(
-                        padding: const EdgeInsets.only(top: 3),
+                        padding: const .only(top: 3),
                         child: ElevatedButton(
-                          onPressed:
-                              state.isLoading
-                                  ? null
-                                  : () {
-                                    if (_formKey.currentState!.validate()) {
-                                      cubit.shareSecret(
-                                        participants: int.parse(
-                                          participants.text,
-                                        ),
-                                        threshold: int.parse(threshold.text),
-                                        masterSecret: Uint8List.fromList(
-                                          hex.decode(secret.text),
-                                        ),
-                                        passphrase: passphrase.text,
-                                      );
-                                    }
-                                  },
+                          onPressed: state.isLoading
+                              ? null
+                              : () {
+                                  if (_formKey.currentState!.validate()) {
+                                    cubit.shareSecret(
+                                      participants: int.parse(
+                                        participants.text,
+                                      ),
+                                      threshold: int.parse(threshold.text),
+                                      masterSecret: Uint8List.fromList(
+                                        hex.decode(secret.text),
+                                      ),
+                                      passphrase: passphrase.text,
+                                    );
+                                  }
+                                },
                           child: const Text('Submit'),
                         ),
                       ),
