@@ -7,30 +7,45 @@ class ShareItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            SelectableText(
-              share,
-              showCursor: false,
-              contextMenuBuilder: (context, editableTextState) {
-                return AdaptiveTextSelectionToolbar.editableText(
-                  editableTextState: editableTextState,
+    return Container(
+      margin: const EdgeInsets.only(top: 12.0),
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          SelectableText(
+            share,
+            style: const TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 13,
+            ),
+            showCursor: false,
+            contextMenuBuilder: (context, editableTextState) {
+              return AdaptiveTextSelectionToolbar.editableText(
+                editableTextState: editableTextState,
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: () async {
+              await Clipboard.setData(ClipboardData(text: share));
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Share copied to clipboard'),
+                    duration: Duration(seconds: 2),
+                  ),
                 );
-              },
-            ),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: () async {
-                await Clipboard.setData(ClipboardData(text: share));
-              },
-              icon: const Icon(Icons.copy),
-              label: const Text('Copy'),
-            ),
-          ],
-        ),
+              }
+            },
+            icon: const Icon(Icons.copy_rounded),
+            label: const Text('Copy Share'),
+          ),
+        ],
       ),
     );
   }
