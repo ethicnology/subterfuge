@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:subterfuge/shared/errors.dart';
 import 'package:subterfuge/shared/slip39_facade.dart';
 import 'state.dart';
 
@@ -11,17 +12,25 @@ class CombineSharesCubit extends Cubit<CombineSharesState> {
 
   void combineShares({
     required int sharesCount,
-    required Map<int, String> shares,
+    required List<String> shares,
     required String passphrase,
   }) {
-    var sharesList = List<String>.from(shares.values);
+    try {
+      emit(state.copyWith(error: null, secret: null));
 
-    final secret = Slip39Facade.combine(
-      shares: sharesList,
-      passphrase: passphrase,
-    );
+      final secret = Slip39Facade.combine(
+        shares: shares,
+        passphrase: passphrase,
+      );
 
-    emit(state.copyWith(secret: secret, error: null));
+      emit(state.copyWith(secret: secret));
+    } catch (e) {
+      if (e is AppError) {
+        emit(state.copyWith(error: AppError(e.message)));
+      } else {
+        emit(state.copyWith(error: AppError(e.toString())));
+      }
+    }
   }
 
   void clearError() => emit(state.copyWith(error: null));
