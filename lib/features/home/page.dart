@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:subterfuge/features/combine_shares/page.dart';
+import 'package:subterfuge/features/home/support_widget.dart';
 import 'package:subterfuge/features/share_secret/page.dart';
 import 'package:subterfuge/features/home/disclaimer_banner.dart';
 
@@ -17,8 +18,9 @@ class HomePage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             const DisclaimerBanner(),
+            const SizedBox(height: 20),
             const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              padding: EdgeInsets.symmetric(horizontal: 20),
               child: SelectableText.rich(
                 TextSpan(
                   children: [
@@ -34,6 +36,7 @@ class HomePage extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 50),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -64,10 +67,10 @@ class HomePage extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 25),
-            const SelectableText(
-              'github.com/ethicnology/subterfuge',
-              style: TextStyle(fontStyle: FontStyle.italic),
+            const SizedBox(height: 50),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: SupportDeveloperWidget(),
             ),
           ],
         ),
