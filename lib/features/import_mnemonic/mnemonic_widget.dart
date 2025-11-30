@@ -226,7 +226,7 @@ class _MnemonicWidgetState extends State<MnemonicWidget> {
       try {
         final mnemonic = bip39.Mnemonic.fromWords(
           words: words,
-          language: widget.language,
+          language: language,
           passphrase: passphrase,
         );
         widget.onSubmit(mnemonic);
@@ -573,6 +573,7 @@ class _MnemonicSentenceWidgetState extends State<MnemonicSentenceWidget> {
                       (entry) => MnemonicWord(
                         index: entry.index,
                         word: entry.word,
+                        language: widget.language,
                         onWordChanged: widget.onWordChanged,
                         focusNode: focusNodes[entry.index],
                         onComplete: () => _focusNext(entry.index + 1),
@@ -591,6 +592,7 @@ class _MnemonicSentenceWidgetState extends State<MnemonicSentenceWidget> {
                       (entry) => MnemonicWord(
                         index: entry.index,
                         word: entry.word,
+                        language: widget.language,
                         onWordChanged: widget.onWordChanged,
                         focusNode: focusNodes[entry.index],
                         onComplete: () => _focusNext(entry.index + 1),
