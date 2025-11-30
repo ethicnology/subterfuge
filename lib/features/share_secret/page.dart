@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:convert/convert.dart';
@@ -23,7 +22,6 @@ class _ShareSecretState extends State<ShareSecretPage> {
   final passphrase = TextEditingController();
   final participants = TextEditingController();
   final threshold = TextEditingController();
-  final random = Random.secure();
 
   @override
   void initState() {
