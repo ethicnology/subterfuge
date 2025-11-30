@@ -6,13 +6,13 @@ import 'package:subterfuge/shared/errors.dart';
 part 'state.mapper.dart';
 
 @MappableClass()
-class CombineSharesState with CombineSharesStateMappable {
+class MergeSharesState with MergeSharesStateMappable {
   final int sharesCount;
   final Map<int, String> shares;
   final AppError? error;
   final Uint8List? secret;
 
-  CombineSharesState({
+  MergeSharesState({
     this.sharesCount = 0,
     this.shares = const {},
     this.error,

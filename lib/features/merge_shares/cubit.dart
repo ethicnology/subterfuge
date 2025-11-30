@@ -3,14 +3,14 @@ import 'package:subterfuge/shared/errors.dart';
 import 'package:subterfuge/shared/slip39_facade.dart';
 import 'state.dart';
 
-class CombineSharesCubit extends Cubit<CombineSharesState> {
-  CombineSharesCubit() : super(CombineSharesState());
+class MergeSharesCubit extends Cubit<MergeSharesState> {
+  MergeSharesCubit() : super(MergeSharesState());
 
   void setSharesCount(int sharesCount) {
     emit(state.copyWith(sharesCount: sharesCount));
   }
 
-  void combineShares({
+  void mergeShares({
     required int sharesCount,
     required List<String> shares,
     required String passphrase,

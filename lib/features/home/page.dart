@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:subterfuge/features/combine_shares/page.dart';
+import 'package:subterfuge/features/merge_shares/page.dart';
 import 'package:subterfuge/features/home/support_widget.dart';
 import 'package:subterfuge/features/share_secret/page.dart';
 import 'package:subterfuge/features/home/disclaimer_banner.dart';
@@ -58,7 +58,7 @@ class HomePage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const CombineSharesPage(),
+                          builder: (context) => const MergeSharesPage(),
                         ),
                       );
                     },

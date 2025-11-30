@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:subterfuge/features/combine_shares/cubit.dart';
-import 'package:subterfuge/features/combine_shares/state.dart';
+import 'package:subterfuge/features/merge_shares/cubit.dart';
+import 'package:subterfuge/features/merge_shares/state.dart';
 import 'package:subterfuge/features/show_secret/page.dart';
 
-class CombineSharesPage extends StatefulWidget {
-  const CombineSharesPage({super.key});
+class MergeSharesPage extends StatefulWidget {
+  const MergeSharesPage({super.key});
 
   @override
-  State<CombineSharesPage> createState() => _RecoverSecretScreenState();
+  State<MergeSharesPage> createState() => _RecoverSecretScreenState();
 }
 
-class _RecoverSecretScreenState extends State<CombineSharesPage> {
+class _RecoverSecretScreenState extends State<MergeSharesPage> {
   final _formKey = GlobalKey<FormState>();
   final passphraseController = TextEditingController();
   final Map<int, TextEditingController> shareControllers = {};
@@ -19,13 +19,13 @@ class _RecoverSecretScreenState extends State<CombineSharesPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => CombineSharesCubit(),
-      child: BlocConsumer<CombineSharesCubit, CombineSharesState>(
+      create: (context) => MergeSharesCubit(),
+      child: BlocConsumer<MergeSharesCubit, MergeSharesState>(
         listenWhen: (previous, current) =>
             previous.secret == null && current.secret != null ||
             previous.error != current.error,
         listener: (context, state) {
-          final cubit = context.read<CombineSharesCubit>();
+          final cubit = context.read<MergeSharesCubit>();
 
           if (state.error != null) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -45,7 +45,7 @@ class _RecoverSecretScreenState extends State<CombineSharesPage> {
           }
         },
         builder: (context, state) {
-          final cubit = context.read<CombineSharesCubit>();
+          final cubit = context.read<MergeSharesCubit>();
 
           return Scaffold(
             appBar: AppBar(title: const Text('Combine shares')),
@@ -140,7 +140,7 @@ class _RecoverSecretScreenState extends State<CombineSharesPage> {
                                 shares.add(input.trim());
                               }
 
-                              cubit.combineShares(
+                              cubit.mergeShares(
                                 sharesCount: state.sharesCount,
                                 shares: shares,
                                 passphrase: passphraseController.text.trim(),
