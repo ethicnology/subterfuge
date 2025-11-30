@@ -4,12 +4,14 @@ import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:subterfuge/features/import_mnemonic/page.dart';
 import 'package:subterfuge/features/show_shares/page.dart';
 import 'cubit.dart';
 import 'state.dart';
 
 class ShareSecretPage extends StatefulWidget {
-  const ShareSecretPage({super.key});
+  final String? secret;
+  const ShareSecretPage({super.key, this.secret});
 
   @override
   State<ShareSecretPage> createState() => _ShareSecretState();
@@ -22,6 +24,14 @@ class _ShareSecretState extends State<ShareSecretPage> {
   final participants = TextEditingController();
   final threshold = TextEditingController();
   final random = Random.secure();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.secret != null) {
+      secret.text = widget.secret!;
+    }
+  }
 
   @override
   void dispose() {
@@ -72,11 +82,40 @@ class _ShareSecretState extends State<ShareSecretPage> {
                   width: 500,
                   child: Column(
                     children: [
+                      MaterialBanner(
+                        padding: const EdgeInsets.all(20),
+                        content: const Text(
+                          'Your secret is a seed?\nYou don\'t know your seed?\nExtract it from your mnemonic.',
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        leading: const Icon(
+                          Icons.help,
+                          color: Colors.black,
+                          size: 32,
+                        ),
+                        backgroundColor: Colors.tealAccent,
+                        actions: <Widget>[
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const ImportMnemonicPage(),
+                                ),
+                              );
+                            },
+                            child: const Text('Mnemonic'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
                       Card(
                         child: Padding(
                           padding: const .all(7),
                           child: TextFormField(
                             controller: secret,
+                            readOnly: widget.secret != null,
                             autovalidateMode: .onUserInteraction,
                             decoration: const InputDecoration(
                               border: UnderlineInputBorder(),
@@ -115,7 +154,7 @@ class _ShareSecretState extends State<ShareSecretPage> {
                                 decoration: const InputDecoration(
                                   labelText: 'Passphrase (optional)',
                                   hintText:
-                                      'eg. DoNotInputYourMnemonicPassphrase',
+                                      'eg. ThisIsNotYourMnemonicPassphrase',
                                 ),
                               ),
                             ),
