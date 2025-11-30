@@ -70,8 +70,13 @@ class _RecoverSecretScreenState extends State<CombineSharesPage> {
                                 ),
                                 validator: (value) {
                                   if (value == null ||
+                                      value.isEmpty ||
                                       int.tryParse(value) == null) {
-                                    return 'Fill with an integer';
+                                    return 'Between 1 and 16';
+                                  }
+                                  if (int.parse(value) < 1 ||
+                                      int.parse(value) > 16) {
+                                    return 'Between 1 and 16';
                                   }
                                   return null;
                                 },
