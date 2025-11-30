@@ -2,6 +2,181 @@ import 'package:bip39_mnemonic/bip39_mnemonic.dart' as bip39;
 import 'package:flutter/material.dart';
 import 'package:subterfuge/shared/errors.dart';
 
+/// Style configuration for [MnemonicWidget].
+///
+/// Allows customization of dimensions, colors, text styles, and decorations.
+class MnemonicWidgetStyle {
+  /// Height of input fields (passphrase, word inputs) and dropdowns.
+  final double inputHeight;
+
+  /// Width of the dropdowns (Language, Length).
+  final double dropdownWidth;
+
+  /// Size of the square box displaying the word index.
+  final double indexBoxSize;
+
+  /// Border radius for all inputs and containers.
+  final double borderRadius;
+
+  /// Spacing between rows and elements.
+  final double standardSpacing;
+
+  /// Padding inside input containers.
+  final double smallPadding;
+
+  /// Horizontal padding for dropdowns and hint chips.
+  final double horizontalPadding;
+
+  /// Color used for the index box when the word is valid.
+  final Color statusValidColor;
+
+  /// Color used for the index box when the word is invalid.
+  final Color statusErrorColor;
+
+  /// Default border color.
+  final Color borderColor;
+
+  /// Text style for the number inside the index box.
+  final TextStyle? indexTextStyle;
+
+  /// Text style for the user input inside the word fields.
+  final TextStyle? wordTextStyle;
+
+  /// Text style for the auto-complete hint chips.
+  final TextStyle? hintTextStyle;
+
+  /// Text style for the error message displayed at the bottom.
+  final TextStyle? errorTextStyle;
+
+  /// Builder to completely replace the submit button.
+  final Widget Function(VoidCallback onPressed)? buttonBuilder;
+
+  /// Custom builder for standard containers (borders).
+  /// Overrides [borderColor] and [borderRadius] if provided.
+  final BoxDecoration Function(BuildContext, MnemonicWidgetStyle)?
+  decorationBuilder;
+
+  /// Custom builder for the status box decoration.
+  /// Overrides [statusValidColor] and [statusErrorColor] if provided.
+  final BoxDecoration Function(Color, MnemonicWidgetStyle)?
+  statusDecorationBuilder;
+
+  /// Custom builder for input decoration (TextFields).
+  final InputDecoration Function({
+    String? labelText,
+    required MnemonicWidgetStyle style,
+  })?
+  inputDecorationBuilder;
+
+  const MnemonicWidgetStyle({
+    this.inputHeight = 45.0,
+    this.dropdownWidth = 130.0,
+    this.indexBoxSize = 35.0,
+    this.borderRadius = 4.0,
+    this.standardSpacing = 16.0,
+    this.smallPadding = 4.0,
+    this.horizontalPadding = 16.0,
+    this.statusValidColor = Colors.green,
+    this.statusErrorColor = Colors.red,
+    this.borderColor = Colors.tealAccent,
+    this.indexTextStyle,
+    this.wordTextStyle,
+    this.hintTextStyle,
+    this.errorTextStyle,
+    this.buttonBuilder,
+    this.decorationBuilder,
+    this.statusDecorationBuilder,
+    this.inputDecorationBuilder,
+  });
+
+  /// Creates a copy of this style with the given fields replaced with the new values.
+  MnemonicWidgetStyle copyWith({
+    double? inputHeight,
+    double? dropdownWidth,
+    double? indexBoxSize,
+    double? borderRadius,
+    double? standardSpacing,
+    double? smallPadding,
+    double? horizontalPadding,
+    Color? statusValidColor,
+    Color? statusErrorColor,
+    Color? borderColor,
+    TextStyle? indexTextStyle,
+    TextStyle? wordTextStyle,
+    TextStyle? hintTextStyle,
+    TextStyle? errorTextStyle,
+    Widget Function(VoidCallback onPressed)? buttonBuilder,
+    BoxDecoration Function(BuildContext, MnemonicWidgetStyle)?
+    decorationBuilder,
+    BoxDecoration Function(Color, MnemonicWidgetStyle)? statusDecorationBuilder,
+    InputDecoration Function({
+      String? labelText,
+      required MnemonicWidgetStyle style,
+    })?
+    inputDecorationBuilder,
+  }) {
+    return MnemonicWidgetStyle(
+      inputHeight: inputHeight ?? this.inputHeight,
+      dropdownWidth: dropdownWidth ?? this.dropdownWidth,
+      indexBoxSize: indexBoxSize ?? this.indexBoxSize,
+      borderRadius: borderRadius ?? this.borderRadius,
+      standardSpacing: standardSpacing ?? this.standardSpacing,
+      smallPadding: smallPadding ?? this.smallPadding,
+      horizontalPadding: horizontalPadding ?? this.horizontalPadding,
+      statusValidColor: statusValidColor ?? this.statusValidColor,
+      statusErrorColor: statusErrorColor ?? this.statusErrorColor,
+      borderColor: borderColor ?? this.borderColor,
+      indexTextStyle: indexTextStyle ?? this.indexTextStyle,
+      wordTextStyle: wordTextStyle ?? this.wordTextStyle,
+      hintTextStyle: hintTextStyle ?? this.hintTextStyle,
+      errorTextStyle: errorTextStyle ?? this.errorTextStyle,
+      buttonBuilder: buttonBuilder ?? this.buttonBuilder,
+      decorationBuilder: decorationBuilder ?? this.decorationBuilder,
+      statusDecorationBuilder:
+          statusDecorationBuilder ?? this.statusDecorationBuilder,
+      inputDecorationBuilder:
+          inputDecorationBuilder ?? this.inputDecorationBuilder,
+    );
+  }
+
+  BoxDecoration standardDecoration(BuildContext context) {
+    if (decorationBuilder != null) return decorationBuilder!(context, this);
+    return BoxDecoration(
+      borderRadius: BorderRadius.circular(borderRadius),
+      border: Border.all(color: borderColor),
+    );
+  }
+
+  BoxDecoration statusDecoration({required Color color}) {
+    if (statusDecorationBuilder != null) {
+      return statusDecorationBuilder!(color, this);
+    }
+    return BoxDecoration(
+      color: color,
+      borderRadius: BorderRadius.circular(borderRadius),
+    );
+  }
+
+  InputDecoration standardInputDecoration({String? labelText}) {
+    if (inputDecorationBuilder != null) {
+      return inputDecorationBuilder!(labelText: labelText, style: this);
+    }
+    return InputDecoration(
+      labelText: labelText,
+      contentPadding: const EdgeInsets.only(right: 8),
+      border: const OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.transparent),
+      ),
+      enabledBorder: const OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.transparent),
+      ),
+      focusedBorder: const OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.transparent),
+      ),
+    );
+  }
+}
+
 class MnemonicWidget extends StatefulWidget {
   final bip39.MnemonicLength length;
   final bip39.Language language;
@@ -10,6 +185,7 @@ class MnemonicWidget extends StatefulWidget {
   final bool allowLengthSelection;
   final bool allowLanguageSelection;
   final bool allowAutoFillWords;
+  final MnemonicWidgetStyle? style;
 
   const MnemonicWidget({
     super.key,
@@ -20,6 +196,7 @@ class MnemonicWidget extends StatefulWidget {
     this.allowLengthSelection = true,
     this.allowLanguageSelection = true,
     this.allowAutoFillWords = true,
+    this.style,
   });
 
   @override
@@ -88,58 +265,50 @@ class _MnemonicWidgetState extends State<MnemonicWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final style = widget.style ?? const MnemonicWidgetStyle();
+
     return SingleChildScrollView(
       child: Column(
         children: [
           if (widget.allowLanguageSelection || widget.allowLengthSelection) ...[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              spacing: 16,
+              spacing: style.standardSpacing,
               children: [
                 if (widget.allowLanguageSelection) ...[
                   MnemonicLanguageDropdown(
                     value: language,
                     onChanged: changeMnemonicLanguage,
+                    style: style,
                   ),
                 ],
                 if (widget.allowLengthSelection) ...[
                   MnemonicLengthDropdown(
                     value: length,
                     onChanged: changeMnemonicLength,
+                    style: style,
                   ),
                 ],
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: style.standardSpacing),
           ],
           MnemonicSentenceWidget(
             words: words,
             language: language,
             onWordChanged: updateMnemonic,
             allowAutoFillWords: widget.allowAutoFillWords,
+            style: style,
           ),
           if (widget.allowPassphrase) ...[
-            const SizedBox(height: 16),
+            SizedBox(height: style.standardSpacing),
             Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(),
-              ),
-              height: 45,
+              padding: EdgeInsets.all(style.smallPadding),
+              decoration: style.standardDecoration(context),
+              height: style.inputHeight,
               child: TextField(
-                decoration: const InputDecoration(
+                decoration: style.standardInputDecoration(
                   labelText: 'Passphrase (optional)',
-                  contentPadding: EdgeInsets.only(right: 8),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.transparent),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.transparent),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.transparent),
-                  ),
                 ),
                 onChanged: updatePassphrase,
                 maxLines: 1,
@@ -147,11 +316,18 @@ class _MnemonicWidgetState extends State<MnemonicWidget> {
             ),
           ],
           if (_error != null) ...[
-            const SizedBox(height: 16),
-            Text(_error!.toString(), style: const TextStyle(color: Colors.red)),
+            SizedBox(height: style.standardSpacing),
+            Text(
+              _error!.toString(),
+              style:
+                  style.errorTextStyle ??
+                  TextStyle(color: style.statusErrorColor),
+            ),
           ],
-          const SizedBox(height: 16),
-          ElevatedButton(onPressed: onSubmit, child: Text('Submit')),
+          SizedBox(height: style.standardSpacing),
+          style.buttonBuilder != null
+              ? style.buttonBuilder!(onSubmit)
+              : FilledButton(onPressed: onSubmit, child: Text('Submit')),
         ],
       ),
     );
@@ -165,6 +341,7 @@ class MnemonicWord extends StatefulWidget {
   final FocusNode focusNode;
   final VoidCallback onComplete;
   final String word;
+  final MnemonicWidgetStyle style;
 
   const MnemonicWord({
     super.key,
@@ -174,6 +351,7 @@ class MnemonicWord extends StatefulWidget {
     required this.onWordChanged,
     required this.focusNode,
     required this.onComplete,
+    required this.style,
   });
 
   @override
@@ -192,32 +370,37 @@ class MnemonicWordState extends State<MnemonicWord> {
   Widget build(BuildContext context) {
     final isValidWord = widget.language.isValid(widget.word);
     _controller.text = widget.word;
+    final style = widget.style;
 
     return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(4)),
-      height: 45,
+      padding: EdgeInsets.all(style.smallPadding),
+      decoration: style.standardDecoration(context),
+      height: style.inputHeight,
       child: Row(
         children: [
           Container(
-            height: 35,
-            width: 35,
+            height: style.indexBoxSize,
+            width: style.indexBoxSize,
             alignment: Alignment.center,
-            decoration: BoxDecoration(
+            decoration: style.statusDecoration(
               color: widget.word.isEmpty
-                  ? Colors.black
+                  ? style.borderColor
                   : isValidWord
-                  ? Colors.green
-                  : Colors.red,
-              borderRadius: BorderRadius.circular(4),
+                  ? style.statusValidColor
+                  : style.statusErrorColor,
             ),
-            child: Text(displayIndex),
+            child: Text(
+              displayIndex,
+              style:
+                  style.indexTextStyle ?? const TextStyle(color: Colors.black),
+            ),
           ),
           Expanded(
             child: TextField(
               enableSuggestions: false,
               autocorrect: false,
               controller: _controller,
+              style: style.wordTextStyle,
               onChanged: (value) {
                 widget.onWordChanged((
                   index: widget.index,
@@ -227,18 +410,7 @@ class MnemonicWordState extends State<MnemonicWord> {
               focusNode: widget.focusNode,
               clipBehavior: Clip.antiAliasWithSaveLayer,
               onEditingComplete: widget.onComplete,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.only(right: 8),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.transparent),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.transparent),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.transparent),
-                ),
-              ),
+              decoration: style.standardInputDecoration(),
             ),
           ),
           if (_controller.text.isNotEmpty || isValidWord)
@@ -262,6 +434,7 @@ class MnemonicSentenceWidget extends StatefulWidget {
   final bip39.Language language;
   final Function(({int index, String word})) onWordChanged;
   final bool allowAutoFillWords;
+  final MnemonicWidgetStyle style;
 
   const MnemonicSentenceWidget({
     super.key,
@@ -269,6 +442,7 @@ class MnemonicSentenceWidget extends StatefulWidget {
     required this.language,
     required this.onWordChanged,
     this.allowAutoFillWords = true,
+    required this.style,
   });
 
   @override
@@ -335,7 +509,8 @@ class _MnemonicSentenceWidgetState extends State<MnemonicSentenceWidget> {
   }
 
   Widget _buildHintsList({Key? key}) {
-    const height = 45.0;
+    final style = widget.style;
+
     final hints = widget.language.list.where(
       (word) => word.startsWith(widget.words[_focusedDisplayIndex]),
     );
@@ -348,19 +523,23 @@ class _MnemonicSentenceWidgetState extends State<MnemonicSentenceWidget> {
 
     if (hints.length == 1 &&
         hints.first == widget.words[_focusedDisplayIndex]) {
-      return const SizedBox(height: height);
+      return SizedBox(height: style.inputHeight);
     }
 
     return SizedBox(
       key: key,
-      height: height,
+      height: style.inputHeight,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: hints.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 16),
+        separatorBuilder: (_, _) => SizedBox(width: style.standardSpacing),
         itemBuilder: (context, index) {
           final hint = hints.elementAt(index);
-          return _HintChip(word: hint, onTap: () => _onHintTap(hint));
+          return _HintChip(
+            word: hint,
+            onTap: () => _onHintTap(hint),
+            style: style,
+          );
         },
       ),
     );
@@ -368,6 +547,7 @@ class _MnemonicSentenceWidgetState extends State<MnemonicSentenceWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final style = widget.style;
     final splitIndex = (widget.words.length / MnemonicSentenceWidget.columns)
         .floor();
     final leftWords = List.generate(
@@ -383,11 +563,11 @@ class _MnemonicSentenceWidgetState extends State<MnemonicSentenceWidget> {
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 16,
+          spacing: style.standardSpacing,
           children: [
             Expanded(
               child: Column(
-                spacing: 16,
+                spacing: style.standardSpacing,
                 children: leftWords
                     .map(
                       (entry) => MnemonicWord(
@@ -396,6 +576,7 @@ class _MnemonicSentenceWidgetState extends State<MnemonicSentenceWidget> {
                         onWordChanged: widget.onWordChanged,
                         focusNode: focusNodes[entry.index],
                         onComplete: () => _focusNext(entry.index + 1),
+                        style: style,
                       ),
                     )
                     .toList(),
@@ -403,7 +584,7 @@ class _MnemonicSentenceWidgetState extends State<MnemonicSentenceWidget> {
             ),
             Expanded(
               child: Column(
-                spacing: 16,
+                spacing: style.standardSpacing,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: rightWords
                     .map(
@@ -413,6 +594,7 @@ class _MnemonicSentenceWidgetState extends State<MnemonicSentenceWidget> {
                         onWordChanged: widget.onWordChanged,
                         focusNode: focusNodes[entry.index],
                         onComplete: () => _focusNext(entry.index + 1),
+                        style: style,
                       ),
                     )
                     .toList(),
@@ -420,7 +602,7 @@ class _MnemonicSentenceWidgetState extends State<MnemonicSentenceWidget> {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: style.standardSpacing),
         _buildHintsList(key: ValueKey(_focusedDisplayIndex)),
       ],
     );
@@ -430,20 +612,22 @@ class _MnemonicSentenceWidgetState extends State<MnemonicSentenceWidget> {
 class MnemonicLengthDropdown extends StatelessWidget {
   final bip39.MnemonicLength value;
   final Function(bip39.MnemonicLength) onChanged;
+  final MnemonicWidgetStyle style;
 
   const MnemonicLengthDropdown({
     super.key,
     required this.value,
     required this.onChanged,
+    required this.style,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 130,
-      height: 45,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(4)),
+      width: style.dropdownWidth,
+      height: style.inputHeight,
+      padding: EdgeInsets.symmetric(horizontal: style.horizontalPadding),
+      decoration: style.standardDecoration(context),
       child: DropdownButton<bip39.MnemonicLength>(
         value: value,
         underline: const SizedBox(),
@@ -466,11 +650,13 @@ class MnemonicLengthDropdown extends StatelessWidget {
 class MnemonicLanguageDropdown extends StatelessWidget {
   final bip39.Language value;
   final Function(bip39.Language) onChanged;
+  final MnemonicWidgetStyle style;
 
   const MnemonicLanguageDropdown({
     super.key,
     required this.value,
     required this.onChanged,
+    required this.style,
   });
 
   String _getLanguageDisplayName(bip39.Language language) {
@@ -501,13 +687,10 @@ class MnemonicLanguageDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 130,
-      height: 45,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(),
-      ),
+      width: style.dropdownWidth,
+      height: style.inputHeight,
+      padding: EdgeInsets.symmetric(horizontal: style.horizontalPadding),
+      decoration: style.standardDecoration(context),
       child: DropdownButton<bip39.Language>(
         value: value,
         underline: const SizedBox(),
@@ -530,17 +713,22 @@ class MnemonicLanguageDropdown extends StatelessWidget {
 class _HintChip extends StatelessWidget {
   final String word;
   final VoidCallback onTap;
+  final MnemonicWidgetStyle style;
 
-  const _HintChip({required this.word, required this.onTap});
+  const _HintChip({
+    required this.word,
+    required this.onTap,
+    required this.style,
+  });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(4)),
-        child: Center(child: Text(word)),
+        padding: EdgeInsets.symmetric(horizontal: style.horizontalPadding),
+        decoration: style.standardDecoration(context),
+        child: Center(child: Text(word, style: style.hintTextStyle)),
       ),
     );
   }
