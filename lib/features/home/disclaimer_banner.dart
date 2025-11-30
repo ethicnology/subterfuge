@@ -8,18 +8,21 @@ class DisclaimerBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialBanner(
       padding: const EdgeInsets.all(20),
-      content: const Text('Experimental Prototype: Use it at your own risk.'),
-      leading: const Icon(Icons.pan_tool),
-      backgroundColor: Colors.red,
+      content: const Text(
+        'Prototype: Use it at your own risk.',
+        style: TextStyle(color: Colors.black),
+      ),
+      leading: const Icon(Icons.pan_tool, color: Colors.redAccent),
+      backgroundColor: Colors.tealAccent,
       actions: <Widget>[
-        TextButton(
+        ElevatedButton(
           onPressed: () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const DisclaimerPage()),
             );
           },
-          child: const Text('READ'),
+          child: const Text('MORE'),
         ),
       ],
     );
