@@ -230,7 +230,7 @@ class _ShareSecretState extends State<ShareSecretPage> {
                       ),
                       Padding(
                         padding: const .only(top: 3),
-                        child: FilledButton(
+                        child: FilledButton.icon(
                           onPressed: state.isLoading
                               ? null
                               : () {
@@ -247,7 +247,8 @@ class _ShareSecretState extends State<ShareSecretPage> {
                                     );
                                   }
                                 },
-                          child: const Text('Submit'),
+                          icon: const Icon(Icons.check_circle_rounded),
+                          label: const Text('Submit'),
                         ),
                       ),
                     ],

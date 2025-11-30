@@ -131,7 +131,7 @@ class _RecoverSecretScreenState extends State<MergeSharesPage> {
                                 ),
                               ),
                             ),
-                        FilledButton(
+                        FilledButton.icon(
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
                               final shares = <String>[];
@@ -147,7 +147,8 @@ class _RecoverSecretScreenState extends State<MergeSharesPage> {
                               );
                             }
                           },
-                          child: const Text('Submit'),
+                          icon: const Icon(Icons.check_circle_rounded),
+                          label: const Text('Submit'),
                         ),
                       ],
                     ),

@@ -42,7 +42,7 @@ class HomePage extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  FilledButton(
+                  FilledButton.icon(
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -51,9 +51,10 @@ class HomePage extends StatelessWidget {
                         ),
                       );
                     },
-                    child: const Text('Share'),
+                    icon: const Icon(Icons.share_rounded),
+                    label: const Text('Share'),
                   ),
-                  FilledButton(
+                  FilledButton.icon(
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -62,7 +63,8 @@ class HomePage extends StatelessWidget {
                         ),
                       );
                     },
-                    child: const Text('Merge'),
+                    icon: const Icon(Icons.merge_type_rounded),
+                    label: const Text('Merge'),
                   ),
                 ],
               ),
