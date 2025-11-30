@@ -82,34 +82,36 @@ class _ShareSecretState extends State<ShareSecretPage> {
                   width: 500,
                   child: Column(
                     children: [
-                      MaterialBanner(
-                        padding: const EdgeInsets.all(20),
-                        content: const Text(
-                          'Your secret is a seed?\nYou don\'t know your seed?\nExtract it from your mnemonic.',
-                          style: TextStyle(color: Colors.black),
-                        ),
-                        leading: const Icon(
-                          Icons.help,
-                          color: Colors.black,
-                          size: 32,
-                        ),
-                        backgroundColor: Colors.tealAccent,
-                        actions: <Widget>[
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const ImportMnemonicPage(),
-                                ),
-                              );
-                            },
-                            child: const Text('Mnemonic'),
+                      if (widget.secret == null) ...[
+                        MaterialBanner(
+                          padding: const EdgeInsets.all(20),
+                          content: const Text(
+                            'Your secret is a seed?\nYou don\'t know your seed?\nExtract it from your mnemonic.',
+                            style: TextStyle(color: Colors.black),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
+                          leading: const Icon(
+                            Icons.help,
+                            color: Colors.black,
+                            size: 32,
+                          ),
+                          backgroundColor: Colors.tealAccent,
+                          actions: <Widget>[
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ImportMnemonicPage(),
+                                  ),
+                                );
+                              },
+                              child: const Text('Mnemonic'),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                      ],
                       Card(
                         child: Padding(
                           padding: const .all(7),
