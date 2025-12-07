@@ -22,7 +22,12 @@ dependencies:
   dart_mappable: ^4.6.1
   flutter_bloc: ^9.1.1
   bip39_mnemonic: ^4.0.1
+  bip32_keys:
+    git:
+      url: https://github.com/ethicnology/dart-bip32-keys
+      ref: af1219e502e7dfe91f3c5675cec9cf3d3467fe4c
   url_launcher: ^6.3.2
+
 
 dev_dependencies:
   flutter_test:
