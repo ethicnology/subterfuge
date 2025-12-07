@@ -6,77 +6,73 @@
 [Try it here](https://ethicnology.github.io/subterfuge/)
 
 <!-- [![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/subterfuge)   -->
-<!-- [![Delisted for Inactivity](https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg)](https://play.google.com/store/apps/details?id=org.ethicnology.subterfuge) -->
 
-A Shamir secret sharing experience using SLIP39 implementation.
+
+A Shamir Secret Sharing tool implementing the SLIP39 standard.
 
 ## About
 
-Adi Shamir published [How to Share a Secret](https://dl.acm.org/doi/pdf/10.1145/359168.359176) in november 1979.  
-Decades later, with the boom of cryptocurrencies, Shamir secret sharing resurface.  
-How to deal with private keys belonging to a group instead of individual such as non-profit organizations and companies…  
-In his scientific publication Shamir presents a threshold schemes ideally suited to applications in which a group of mutually suspicious individuals with conflicting interests must cooperate. Ideally, we would like the cooperation to be based on mutual consent.
-Satoshi Lab Improvement Proposal n°39 or [SLIP39](https://github.com/satoshilabs/slips/blob/master/slip-0039.md) is the document that formalize Shamir's Secret Sharing for [Mnemonic Codes](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki), a group of easy to remember words which are widespread to back up secret keys.  
-This application is an attempt to implement SLIP39 in [Flutter](https://flutter.dev/), an open source framework by Google for building natively compiled, multi-platform (**Linux, Web, Android, Windows, MacOs, iOs**) applications from a single codebase.
+In November 1979, Adi Shamir published [How to Share a Secret](https://dl.acm.org/doi/pdf/10.1145/359168.359176). Years later, with the rise of cryptocurrencies, the need to manage private keys for groups (like non-profits or companies) rather than just individuals brought this concept back to the forefront.
+
+Shamir's threshold scheme allows a group of individuals—even those who may not fully trust one another—to cooperate. Access requires mutual consent, defined by a specific threshold of shares.
+
+[SLIP39](https://github.com/satoshilabs/slips/blob/master/slip-0039.md) (SatoshiLabs Improvement Proposal no. 39) formalizes Shamir's Secret Sharing for Seeds, allowing secrets to be backed up as a set of easy-to-remember words.
+
+This application implements SLIP39 using [Flutter](https://flutter.dev/), Google's open-source framework, enabling a single codebase to run natively on **Linux, Web, Android, Windows, macOS, and iOS**.
 
 ## Disclaimer
 
-Please verify that your shares works by recovering your secret before using them.  
+**Always verify that you can recover your secret from your shares before relying on them.**
 
-This application relies on [slip39-dart](https://github.com/ilap/slip39-dart) **as this dependency is flagged as early development phase, use it at your own risk**, please consider supporting [ilap](https://github.com/ilap) works.
+This application uses [slip39-dart](https://github.com/ilap/slip39-dart). **As this dependency is still beta, use it at your own risk.** Please consider supporting [ilap's](https://github.com/ilap) work.
 
 ## Usage
 
-These methods avoid keeping a single point of failure for your secrets (keys).
+Eliminate single points of failure for your secrets and keys using these methods:
 
 ### Backup
 
-Keeping a secret safe is hard, subterfuge can help you to setup a scheme of 5 parts/shares which require a threshold of 3 parts/shares to recover the original secret. Then you can disperse these parts/shares in different locations.  
+Securing a seed (from a mnemonic) is difficult. Subterfuge helps you create a scheme (e.g., 5 total shares with a recovery threshold of 3) that allows you to distribute shares across different locations.
 
 ### Organizations
 
-Managing the access of services, machines, documents by shared secret scheme of many individuals with the needed threshold.
+Manage access to services, hardware, or documents using a shared secret scheme. This requires a specific number of authorized individuals to collaborate to gain access.
 
 ### Legacy
 
-Your secret securing documents and funds that you want to bequeath your relatives to access in case of death…
+Secure documents and funds for your heirs. Create a recovery scheme that allows your relatives to access your digital assets only when necessary (e.g., in case of death).
 
-## Support my work
+## [Support my work](http://support.ethicnology.com?app=furtive)
 
-```sh
-bitcoin: bc1qyhzq7twqz087ledn4zpz0xhxx23t5aa8s395nn
-paypal:  ethicnology@pm.me
-```
+
 
 ## Screenshots
 
-![home](https://github.com/ethicnology/subterfuge/blob/main/assets/home.png)
-![create](https://github.com/ethicnology/subterfuge/blob/main/assets/create_secret.png)
-![shares](https://github.com/ethicnology/subterfuge/blob/main/assets/shares.png)
-![recover](https://github.com/ethicnology/subterfuge/blob/main/assets/recover_secret.png)
-![secret](https://github.com/ethicnology/subterfuge/blob/main/assets/secret.png)
-![disclaimer](https://github.com/ethicnology/subterfuge/blob/main/assets/disclaimer.png)
+<p float="left">
+  <img src="assets/1.2.0/1_home.png" width="200" />
+  <img src="assets/1.2.0/2_share_secret.png" width="200" /> 
+  <img src="assets/1.2.0/3_extract_seed.png" width="200" />
+  <img src="assets/1.2.0/4_shares.png" width="200" />
+  <img src="assets/1.2.0/5_merge_shares.png" width="200" />
+  <img src="assets/1.2.0/6_secret.png" width="200" />
+  <img src="assets/1.2.0/7_secret_with_zpub.png" width="200" />
+</p>
 
 ### dataset
 
-secret
-
-```sh
-fac4167d1e712b0065f563e88a5d365df95368072c42e8c306cff568cb6e1080
+Mnemonic
+```
+zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong
 ```
 
-passphrase
-
+Seed
 ```sh
-r0bust
+b6a6d8921942dd9806607ebc2750416b289adea669198769f2e15ed926c3aa92bf88ece232317b4ea463e84b0fcd3b53577812ee449ccc448eb45e6f544e25b6
 ```
 
-shares
-
+2/3 shares 
 ```sh
-treat leader adjust academic alpha fused clinic slap cinema moisture stay ticket holy revenue triumph database wireless keyboard much triumph listen jerky ancestor belong credit perfect enemy pharmacy hush genius juice jacket very
+voting leader beard leader academic tidy vegan temple mansion prize sharp lobe capital umbrella tactics network window traffic perfect width glimpse armed center rebuild earth declare privacy corner fantasy walnut keyboard blimp bedroom superior weapon ending legs prepare making sister rival peasant estimate mayor club realize avoid tactics blessing campus slap document race engage step marvel class frozen percent
 
-treat leader chemical academic already hearing friar elite shame aviation clinic morning enjoy clothes hush wealthy voter public recover edge spend jewelry chubby marathon velvet much dominant violence response prayer pecan reject cowboy
-
-treat leader elder academic antenna costume fridge have amuse warn element wildlife sugar deal answer exotic flame saver race brother forget smear woman blue eyebrow arcade average walnut receiver craft railroad glen amount
+voting leader ceramic leader acid liberty alarm invasion adorn script python desert clothes increase mandate deny tenant chubby body prune news photo writing bedroom careful dish alpha miracle webcam eraser briefing location elder pregnant package modern justice rainbow slush spark memory duke stadium season transfer cultural echo heat fantasy geology bulb merit detect wrist webcam ocean cultural breathe hospital
 ```
