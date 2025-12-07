@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:subterfuge/features/disclaimer/page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DisclaimerBanner extends StatelessWidget {
   const DisclaimerBanner({super.key});
@@ -9,7 +9,7 @@ class DisclaimerBanner extends StatelessWidget {
     return MaterialBanner(
       padding: const EdgeInsets.all(20),
       content: const Text(
-        'Prototype: Use it at your own risk.',
+        'Dont trust, verify',
         style: TextStyle(color: Colors.black),
       ),
       leading: const Icon(Icons.pan_tool, color: Colors.redAccent),
@@ -17,12 +17,9 @@ class DisclaimerBanner extends StatelessWidget {
       actions: <Widget>[
         ElevatedButton(
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const DisclaimerPage()),
-            );
+            launchUrl(Uri.parse('https://github.com/ethicnology/subterfuge'));
           },
-          child: const Text('MORE'),
+          child: const Text('VERIFY'),
         ),
       ],
     );
