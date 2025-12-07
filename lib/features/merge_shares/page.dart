@@ -48,7 +48,7 @@ class _RecoverSecretScreenState extends State<MergeSharesPage> {
           final cubit = context.read<MergeSharesCubit>();
 
           return Scaffold(
-            appBar: AppBar(title: const Text('Combine shares')),
+            appBar: AppBar(title: const Text('Merge shares')),
             body: Form(
               key: _formKey,
               child: Center(
