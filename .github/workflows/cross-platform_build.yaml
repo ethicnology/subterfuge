@@ -4,7 +4,7 @@ on:
     branches:
       - main
 env:
-  APP_NAME: Subterfuge
+  APP_NAME: subterfuge
 
 jobs:
   macos:
@@ -51,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.APP_NAME }}-android.apk
-          path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
 
   linux-x64:
     runs-on: ubuntu-24.04
