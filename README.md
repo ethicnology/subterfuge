@@ -44,8 +44,6 @@ Secure documents and funds for your heirs. Create a recovery scheme that allows 
 
 ## [Support my work](http://support.ethicnology.com?app=furtive)
 
-
-
 ## Screenshots
 
 <p float="left">
@@ -58,7 +56,18 @@ Secure documents and funds for your heirs. Create a recovery scheme that allows 
   <img src="assets/1.2.0/7_secret_with_zpub.png" width="200" />
 </p>
 
-### dataset
+## DIY
+
+```sh
+curl -fsSL https://fvm.app/install.sh | bash
+fvm install
+fvm flutter pub get
+fvm dart run build_runner build --delete-conflicting-outputs
+fvm flutter build
+```
+
+
+## Dataset
 
 Mnemonic
 ```
