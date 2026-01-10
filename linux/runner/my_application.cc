@@ -54,6 +54,16 @@ static void my_application_activate(GApplication* application) {
 
   gtk_window_set_default_size(window, 1280, 720);
 
+  // Source - https://stackoverflow.com/a
+  // Posted by Ali Yar Khan
+  // Retrieved 2026-01-10, License - CC BY-SA 4.0
+  if (g_file_test("assets", G_FILE_TEST_IS_DIR)){
+      gtk_window_set_icon_from_file(window, "assets/logo.png", NULL); // For debug mode
+    } else {
+      gtk_window_set_icon_from_file(window, "data/flutter_assets/assets/logo.png", NULL); // For release mode
+    }
+
+
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   fl_dart_project_set_dart_entrypoint_arguments(
       project, self->dart_entrypoint_arguments);

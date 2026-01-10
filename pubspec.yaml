@@ -44,9 +44,9 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-  - assets/logo.png
+    - assets/logo.png
 
-flutter_icons:
+flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
   image_path: "assets/logo.png"
