@@ -361,6 +361,26 @@ class MnemonicWord extends StatefulWidget {
 class MnemonicWordState extends State<MnemonicWord> {
   final _controller = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    _controller.text = widget.word;
+  }
+
+  @override
+  void didUpdateWidget(MnemonicWord oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.word != oldWidget.word && widget.word != _controller.text) {
+      _controller.text = widget.word;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   String get displayIndex {
     final displayIndex = widget.index + 1;
     return displayIndex < 10 ? '0$displayIndex' : '$displayIndex';
@@ -369,7 +389,6 @@ class MnemonicWordState extends State<MnemonicWord> {
   @override
   Widget build(BuildContext context) {
     final isValidWord = widget.language.isValid(widget.word);
-    _controller.text = widget.word;
     final style = widget.style;
 
     return Container(
