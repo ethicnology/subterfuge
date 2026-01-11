@@ -1,7 +1,7 @@
 name: subterfuge
 description: Shamir secret sharing experience using SLIP39 implementation.
 homepage: https://github.com/ethicnology/subterfuge
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 version: 1.2.0
 
@@ -28,7 +28,6 @@ dependencies:
       ref: af1219e502e7dfe91f3c5675cec9cf3d3467fe4c
   url_launcher: ^6.3.2
 
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -36,6 +35,7 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.4
   build_runner: ^2.10.0
   dart_mappable_builder: ^4.6.1
+  msix: ^3.16.12
 
 # The following section is specific to Flutter packages.
 flutter:
@@ -59,7 +59,15 @@ flutter_launcher_icons:
   windows:
     generate: true
     image_path: "assets/logo.png"
-    icon_size: 48 
+    icon_size: 48
   macos:
     generate: true
     image_path: "assets/logo.png"
+
+msix_config:
+  display_name: Subterfuge
+  publisher_display_name: ethicnology
+  identity_name: ethicnology.subterfuge
+  msix_version: 1.2.0.0
+  logo_path: assets/logo.png
+  install_certificate: false
