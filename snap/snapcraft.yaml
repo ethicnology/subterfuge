@@ -4,21 +4,21 @@ summary: Shamir Secret Sharing SLIP39
 description: A Shamir secret sharing experience using SLIP39 implementation.
 
 confinement: strict
-base: core18
+base: core24
 grade: stable
 
 slots:
-  dbus-subterfuge: 
+  dbus-subterfuge:
     interface: dbus
     bus: session
-    name: org.ethicnology.subterfuge
-    
+    name: com.ethicnology.subterfuge
+
 apps:
   subterfuge:
     command: subterfuge
     extensions: [flutter-master]
     plugs:
-    - network
+      - network
     slots:
       - dbus-subterfuge
 parts:

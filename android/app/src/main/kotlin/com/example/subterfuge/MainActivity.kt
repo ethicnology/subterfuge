@@ -1,4 +1,4 @@
-package org.ethicnology.subterfuge
+package com.ethicnology.subterfuge
 
 import io.flutter.embedding.android.FlutterActivity
 
