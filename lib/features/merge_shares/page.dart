@@ -51,7 +51,8 @@ class _RecoverSecretScreenState extends State<MergeSharesPage> {
             appBar: AppBar(title: const Text('Merge shares')),
             body: Form(
               key: _formKey,
-              child: Center(
+              child: Align(
+                alignment: Alignment.topCenter,
                 child: SizedBox(
                   width: 500,
                   child: SingleChildScrollView(

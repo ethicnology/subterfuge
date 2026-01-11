@@ -75,181 +75,185 @@ class _ShareSecretState extends State<ShareSecretPage> {
             appBar: AppBar(title: const Text('Share a secret')),
             body: Form(
               key: _formKey,
-              child: Center(
+              child: Align(
+                alignment: Alignment.topCenter,
                 child: SizedBox(
                   width: 500,
-                  child: Column(
-                    children: [
-                      if (widget.secret == null) ...[
-                        MaterialBanner(
-                          padding: const EdgeInsets.all(20),
-                          content: const Text(
-                            'Your secret is a seed?\nYou don\'t know your seed?\nExtract it from your mnemonic.',
-                            style: TextStyle(color: Colors.black),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        if (widget.secret == null) ...[
+                          MaterialBanner(
+                            padding: const EdgeInsets.all(20),
+                            content: const Text(
+                              'Your secret is a seed?\nYou don\'t know your seed?\nExtract it from your mnemonic.',
+                              style: TextStyle(color: Colors.black),
+                            ),
+                            leading: const Icon(
+                              Icons.help,
+                              color: Colors.black,
+                              size: 32,
+                            ),
+                            backgroundColor: Colors.tealAccent,
+                            actions: <Widget>[
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ImportMnemonicPage(),
+                                    ),
+                                  );
+                                },
+                                child: const Text('Mnemonic'),
+                              ),
+                            ],
                           ),
-                          leading: const Icon(
-                            Icons.help,
-                            color: Colors.black,
-                            size: 32,
-                          ),
-                          backgroundColor: Colors.tealAccent,
-                          actions: <Widget>[
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const ImportMnemonicPage(),
-                                  ),
-                                );
+                          const SizedBox(height: 20),
+                        ],
+                        Card(
+                          child: Padding(
+                            padding: const .all(7),
+                            child: TextFormField(
+                              controller: secret,
+                              readOnly: widget.secret != null,
+                              autovalidateMode: .onUserInteraction,
+                              decoration: const InputDecoration(
+                                border: UnderlineInputBorder(),
+                                hintText:
+                                    'eg. 0123456789abcdef0123456789ABCDEF',
+                                labelText: 'Secret',
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Hexadecimal seed';
+                                }
+                                if (value.length < 32) {
+                                  return 'At least 32 characters (16 bytes)';
+                                }
+                                if (!((value.length % 2) == 0)) {
+                                  return 'Not an even number of characters';
+                                }
+                                try {
+                                  hex.decode(value);
+                                } catch (e) {
+                                  return 'Invalid hexadecimal seed';
+                                }
+                                return null;
                               },
-                              child: const Text('Mnemonic'),
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                      ],
-                      Card(
-                        child: Padding(
-                          padding: const .all(7),
-                          child: TextFormField(
-                            controller: secret,
-                            readOnly: widget.secret != null,
-                            autovalidateMode: .onUserInteraction,
-                            decoration: const InputDecoration(
-                              border: UnderlineInputBorder(),
-                              hintText: 'eg. 0123456789abcdef0123456789ABCDEF',
-                              labelText: 'Secret',
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Hexadecimal seed';
-                              }
-                              if (value.length < 32) {
-                                return 'At least 32 characters (16 bytes)';
-                              }
-                              if (!((value.length % 2) == 0)) {
-                                return 'Not an even number of characters';
-                              }
-                              try {
-                                hex.decode(value);
-                              } catch (e) {
-                                return 'Invalid hexadecimal seed';
-                              }
-                              return null;
-                            },
                           ),
                         ),
-                      ),
-                      Card(
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const .all(7),
-                              child: TextFormField(
-                                enableSuggestions: false,
-                                autocorrect: false,
-                                controller: passphrase,
-                                decoration: const InputDecoration(
-                                  labelText: 'Passphrase (optional)',
-                                  hintText:
-                                      'eg. ThisIsNotYourMnemonicPassphrase',
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Card(
-                        child: Padding(
-                          padding: const .all(7),
-                          child: Row(
-                            mainAxisAlignment: .spaceBetween,
+                        Card(
+                          child: Column(
                             children: [
-                              Flexible(
-                                child: SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.3,
-                                  child: TextFormField(
-                                    controller: participants,
-                                    keyboardType: .number,
-                                    decoration: const InputDecoration(
-                                      border: UnderlineInputBorder(),
-                                      labelText: 'Participants',
-                                    ),
-                                    autovalidateMode: .onUserInteraction,
-                                    validator: (value) {
-                                      if (value == null ||
-                                          value.isEmpty ||
-                                          int.tryParse(value) == null) {
-                                        return 'Between 1 and 16';
-                                      }
-                                      if (int.parse(value) < 1 ||
-                                          int.parse(value) > 16) {
-                                        return 'Between 1 and 16';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ),
-                              const Spacer(),
-                              Flexible(
-                                child: SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.3,
-                                  child: TextFormField(
-                                    controller: threshold,
-                                    keyboardType: .number,
-                                    decoration: const InputDecoration(
-                                      border: UnderlineInputBorder(),
-                                      labelText: 'Threshold',
-                                    ),
-                                    autovalidateMode: .onUserInteraction,
-                                    validator: (value) {
-                                      if (value == null ||
-                                          value.isEmpty ||
-                                          int.tryParse(value) == null) {
-                                        return 'Between 1 and 16';
-                                      }
-                                      if (int.parse(value) < 1 ||
-                                          int.parse(value) > 16) {
-                                        return 'Between 1 and 16';
-                                      }
-                                      return null;
-                                    },
+                              Padding(
+                                padding: const .all(7),
+                                child: TextFormField(
+                                  enableSuggestions: false,
+                                  autocorrect: false,
+                                  controller: passphrase,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Passphrase (optional)',
+                                    hintText:
+                                        'eg. ThisIsNotYourMnemonicPassphrase',
                                   ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const .only(top: 3),
-                        child: FilledButton.icon(
-                          onPressed: state.isLoading
-                              ? null
-                              : () {
-                                  if (_formKey.currentState!.validate()) {
-                                    cubit.shareSecret(
-                                      participants: int.parse(
-                                        participants.text,
+                        Card(
+                          child: Padding(
+                            padding: const .all(7),
+                            child: Row(
+                              mainAxisAlignment: .spaceBetween,
+                              children: [
+                                Flexible(
+                                  child: SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.3,
+                                    child: TextFormField(
+                                      controller: participants,
+                                      keyboardType: .number,
+                                      decoration: const InputDecoration(
+                                        border: UnderlineInputBorder(),
+                                        labelText: 'Participants',
                                       ),
-                                      threshold: int.parse(threshold.text),
-                                      masterSecret: Uint8List.fromList(
-                                        hex.decode(secret.text),
+                                      autovalidateMode: .onUserInteraction,
+                                      validator: (value) {
+                                        if (value == null ||
+                                            value.isEmpty ||
+                                            int.tryParse(value) == null) {
+                                          return 'Between 1 and 16';
+                                        }
+                                        if (int.parse(value) < 1 ||
+                                            int.parse(value) > 16) {
+                                          return 'Between 1 and 16';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                const Spacer(),
+                                Flexible(
+                                  child: SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.3,
+                                    child: TextFormField(
+                                      controller: threshold,
+                                      keyboardType: .number,
+                                      decoration: const InputDecoration(
+                                        border: UnderlineInputBorder(),
+                                        labelText: 'Threshold',
                                       ),
-                                      passphrase: passphrase.text,
-                                    );
-                                  }
-                                },
-                          icon: const Icon(Icons.check_circle_rounded),
-                          label: const Text('Submit'),
+                                      autovalidateMode: .onUserInteraction,
+                                      validator: (value) {
+                                        if (value == null ||
+                                            value.isEmpty ||
+                                            int.tryParse(value) == null) {
+                                          return 'Between 1 and 16';
+                                        }
+                                        if (int.parse(value) < 1 ||
+                                            int.parse(value) > 16) {
+                                          return 'Between 1 and 16';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
+                        Padding(
+                          padding: const .only(top: 3),
+                          child: FilledButton.icon(
+                            onPressed: state.isLoading
+                                ? null
+                                : () {
+                                    if (_formKey.currentState!.validate()) {
+                                      cubit.shareSecret(
+                                        participants: int.parse(
+                                          participants.text,
+                                        ),
+                                        threshold: int.parse(threshold.text),
+                                        masterSecret: Uint8List.fromList(
+                                          hex.decode(secret.text),
+                                        ),
+                                        passphrase: passphrase.text,
+                                      );
+                                    }
+                                  },
+                            icon: const Icon(Icons.check_circle_rounded),
+                            label: const Text('Submit'),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

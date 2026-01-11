@@ -13,7 +13,7 @@ class SupportDeveloperWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            Wrap(
               children: [
                 Icon(Icons.favorite_rounded, color: Colors.redAccent, size: 24),
                 const SizedBox(width: 12),
