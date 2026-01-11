@@ -127,9 +127,10 @@ jobs:
 
       - run: fvm flutter config --enable-windows-desktop
       - run: fvm flutter build windows --release
+      - run: fvm dart run msix:create
 
-      - name: Upload Windows artifact
+      - name: Upload Windows MSIX
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.APP_NAME }}-windows-x64
-          path: build\windows\x64\runner\Release
+          name: ${{ env.APP_NAME }}-windows-x64.msix
+          path: build\windows\x64\runner\Release\*.msix
