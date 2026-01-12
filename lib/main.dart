@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:subterfuge/features/home/page.dart';
 import 'package:subterfuge/shared/theme.dart';
@@ -11,7 +12,7 @@ const Size _defaultSize = Size(900, 600);
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+  if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
     await windowManager.ensureInitialized();
 
     await windowManager.setMinimumSize(_minimalSize);
