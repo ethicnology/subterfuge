@@ -10,6 +10,7 @@ flutter build web --release --base-href '/subterfuge/'
 cd build/web
 
 git init
+git branch -m main
 git add -A
 git commit -m 'deploy'
 
