@@ -1,4 +1,5 @@
 import 'package:bip32_keys/bip32_keys.dart';
+import 'package:bip39_mnemonic/bip39_mnemonic.dart';
 import 'package:convert/convert.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,7 +22,7 @@ class ShowSecretPage extends StatefulWidget {
 }
 
 class _ShowSecretPageState extends State<ShowSecretPage> {
-  bool isSeed = false;
+  bool isMnemonic = false;
   ScriptType _selectedScriptType = ScriptType.segwit;
   final TextEditingController _accountController = TextEditingController(
     text: '0',
@@ -36,9 +37,11 @@ class _ShowSecretPageState extends State<ShowSecretPage> {
   @override
   Widget build(BuildContext context) {
     String? extendedPublicKey;
-    if (isSeed) {
+    if (isMnemonic) {
       try {
-        final masterNode = Bip32MasterNode.fromSeed(widget.secret);
+        final mnemonic = Mnemonic(widget.secret, Language.english);
+        final seed = Uint8List.fromList(mnemonic.seed);
+        final masterNode = Bip32MasterNode.fromSeed(seed);
         final int account = int.tryParse(_accountController.text) ?? 0;
         final safeAccount = account < 0 ? 0 : account;
 
@@ -82,11 +85,11 @@ class _ShowSecretPageState extends State<ShowSecretPage> {
               ),
               const SizedBox(height: 16),
               SwitchListTile(
-                title: const Text('The secret is a Seed'),
-                value: isSeed,
-                onChanged: (value) => setState(() => isSeed = value),
+                title: const Text('The secret is a Mnemonic'),
+                value: isMnemonic,
+                onChanged: (value) => setState(() => isMnemonic = value),
               ),
-              if (isSeed) ...[
+              if (isMnemonic) ...[
                 const SizedBox(height: 16),
                 DropdownButtonFormField<ScriptType>(
                   initialValue: _selectedScriptType,

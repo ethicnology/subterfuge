@@ -1,3 +1,4 @@
+import 'package:bip39_mnemonic/bip39_mnemonic.dart';
 import 'package:convert/convert.dart';
 import 'package:flutter/material.dart';
 import 'package:subterfuge/features/import_mnemonic/mnemonic_widget.dart';
@@ -16,6 +17,9 @@ class ImportMnemonicPage extends StatelessWidget {
           // Passphrase disabled: would require backing up 512-bit seed instead of entropy,
           // resulting in 59-word SLIP-39 shares unsupported by most hardware wallets.
           allowPassphrase: false,
+          // We do not allow language selection because SLIP39 is compatible with english only
+          allowLanguageSelection: false,
+          language: Language.english,
           onSubmit: (mnemonic) {
             // !!! IMPORTANT !!!
             // - Entropy (128/256 bits) → 20/33-word SLIP-39 shares (standard, hardware wallet compatible)

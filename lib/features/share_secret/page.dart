@@ -86,7 +86,7 @@ class _ShareSecretState extends State<ShareSecretPage> {
                           MaterialBanner(
                             padding: const EdgeInsets.all(20),
                             content: const Text(
-                              'Your secret is a seed?\nYou don\'t know your seed?\nExtract it from your mnemonic.',
+                              'Your secret is a mnemonic?\nExtract the entropy',
                               style: TextStyle(color: Colors.black),
                             ),
                             leading: const Icon(
@@ -127,7 +127,7 @@ class _ShareSecretState extends State<ShareSecretPage> {
                               ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Hexadecimal seed';
+                                  return 'Hexadecimal input';
                                 }
                                 if (value.length < 32) {
                                   return 'At least 32 characters (16 bytes)';
@@ -138,7 +138,7 @@ class _ShareSecretState extends State<ShareSecretPage> {
                                 try {
                                   hex.decode(value);
                                 } catch (e) {
-                                  return 'Invalid hexadecimal seed';
+                                  return 'Invalid hexadecimal input';
                                 }
                                 return null;
                               },
