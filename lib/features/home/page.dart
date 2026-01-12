@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:subterfuge/features/import_mnemonic/page.dart';
 import 'package:subterfuge/features/merge_shares/page.dart';
 import 'package:subterfuge/features/home/support_widget.dart';
-import 'package:subterfuge/features/share_secret/page.dart';
 import 'package:subterfuge/features/home/disclaimer_banner.dart';
 
 class HomePage extends StatelessWidget {
@@ -47,12 +47,12 @@ class HomePage extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const ShareSecretPage(),
+                            builder: (context) => const ImportMnemonicPage(),
                           ),
                         );
                       },
                       icon: const Icon(Icons.share_rounded),
-                      label: const Text('Share a secret'),
+                      label: const Text('Share mnemonic'),
                     ),
                     const SizedBox(height: 50),
                     FilledButton.icon(
@@ -65,7 +65,7 @@ class HomePage extends StatelessWidget {
                         );
                       },
                       icon: const Icon(Icons.merge_type_rounded),
-                      label: const Text('Merge shares'),
+                      label: const Text('Recover mnemonic'),
                     ),
                     const Spacer(),
                     const Padding(

@@ -1,29 +1,30 @@
-import 'package:bip32_keys/bip32_keys.dart';
-import 'package:bip39_mnemonic/bip39_mnemonic.dart';
-import 'package:convert/convert.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:subterfuge/features/show_secret/cubit.dart';
+import 'package:subterfuge/features/show_secret/state.dart';
 
-enum ScriptType {
-  legacy(title: 'Legacy (BIP44)'),
-  nestedSegwit(title: 'Nested Segwit (BIP49)'),
-  segwit(title: 'Segwit (BIP84)');
-
-  final String title;
-  const ScriptType({required this.title});
-}
-
-class ShowSecretPage extends StatefulWidget {
+class ShowSecretPage extends StatelessWidget {
   final Uint8List secret;
   const ShowSecretPage({super.key, required this.secret});
 
   @override
-  State<ShowSecretPage> createState() => _ShowSecretPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => ShowSecretCubit(secret: secret),
+      child: const _ShowSecretView(),
+    );
+  }
 }
 
-class _ShowSecretPageState extends State<ShowSecretPage> {
-  bool isMnemonic = false;
-  ScriptType _selectedScriptType = ScriptType.segwit;
+class _ShowSecretView extends StatefulWidget {
+  const _ShowSecretView();
+
+  @override
+  State<_ShowSecretView> createState() => _ShowSecretViewState();
+}
+
+class _ShowSecretViewState extends State<_ShowSecretView> {
   final TextEditingController _accountController = TextEditingController(
     text: '0',
   );
@@ -36,112 +37,104 @@ class _ShowSecretPageState extends State<ShowSecretPage> {
 
   @override
   Widget build(BuildContext context) {
-    String? extendedPublicKey;
-    if (isMnemonic) {
-      try {
-        final mnemonic = Mnemonic(widget.secret, Language.english);
-        final seed = Uint8List.fromList(mnemonic.seed);
-        final masterNode = Bip32MasterNode.fromSeed(seed);
-        final int account = int.tryParse(_accountController.text) ?? 0;
-        final safeAccount = account < 0 ? 0 : account;
+    return BlocBuilder<ShowSecretCubit, ShowSecretState>(
+      builder: (context, state) {
+        final cubit = context.read<ShowSecretCubit>();
 
-        final Bip32Accounts wallet;
-        switch (_selectedScriptType) {
-          case ScriptType.legacy:
-            wallet = masterNode.toBip44Legacy(account: safeAccount);
-            break;
-          case ScriptType.nestedSegwit:
-            wallet = masterNode.toBip49NestedSegwit(account: safeAccount);
-            break;
-          case ScriptType.segwit:
-            wallet = masterNode.toBip84SegwitWallet(account: safeAccount);
-            break;
-        }
-        extendedPublicKey = wallet.extendedPublicKey;
-      } catch (_) {
-        // Handle derivation errors if any
-      }
-    }
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('Secret')),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.lock_open_rounded,
-                size: 64,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(height: 24),
-              _SecretCard(
-                title: 'Your Secret',
-                icon: Icons.key_rounded,
-                content: hex.encode(widget.secret),
-              ),
-              const SizedBox(height: 16),
-              SwitchListTile(
-                title: const Text('The secret is a Mnemonic'),
-                value: isMnemonic,
-                onChanged: (value) => setState(() => isMnemonic = value),
-              ),
-              if (isMnemonic) ...[
-                const SizedBox(height: 16),
-                DropdownButtonFormField<ScriptType>(
-                  initialValue: _selectedScriptType,
-                  decoration: const InputDecoration(
-                    labelText: 'Script Type',
-                    border: OutlineInputBorder(),
+        return Scaffold(
+          appBar: AppBar(title: const Text('Secret')),
+          body: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.lock_open_rounded,
+                    size: 64,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
-                  items: ScriptType.values.map((type) {
-                    return DropdownMenuItem(
-                      value: type,
-                      child: Text(type.title),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() => _selectedScriptType = value);
-                    }
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _accountController,
-                  decoration: const InputDecoration(
-                    labelText: 'Account',
-                    border: OutlineInputBorder(),
-                    helperText: 'Account index (default: 0)',
-                  ),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  onChanged: (_) => setState(() {}),
-                ),
-                if (extendedPublicKey != null) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
                   _SecretCard(
-                    title: 'Extended Public Key',
-                    icon: Icons.public_rounded,
-                    content: extendedPublicKey,
+                    title: state.isEntropy ? 'Mnemonic' : 'Seed',
+                    icon: state.isEntropy
+                        ? Icons.article_rounded
+                        : Icons.key_rounded,
+                    content: state.displaySecret,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    state.secretType.title,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  DropdownButtonFormField<ScriptType>(
+                    initialValue: state.scriptType,
+                    decoration: const InputDecoration(
+                      labelText: 'Script Type',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: ScriptType.values.map((type) {
+                      return DropdownMenuItem(
+                        value: type,
+                        child: Text(type.title),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        cubit.setScriptType(value);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _accountController,
+                    decoration: const InputDecoration(
+                      labelText: 'Account',
+                      border: OutlineInputBorder(),
+                      helperText: 'Account index (default: 0)',
+                    ),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    onChanged: (value) {
+                      final account = int.tryParse(value) ?? 0;
+                      cubit.setAccount(account);
+                    },
+                  ),
+                  if (state.extendedPublicKey != null) ...[
+                    const SizedBox(height: 16),
+                    _SecretCard(
+                      title: 'Extended Public Key',
+                      icon: Icons.public_rounded,
+                      content: state.extendedPublicKey!,
+                    ),
+                  ],
+                  if (state.error != null) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      state.error!,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  FilledButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    },
+                    icon: const Icon(Icons.check_circle_rounded),
+                    label: const Text('Done'),
                   ),
                 ],
-              ],
-              const SizedBox(height: 24),
-              FilledButton.icon(
-                onPressed: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                },
-                icon: const Icon(Icons.check_circle_rounded),
-                label: const Text('Done'),
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
