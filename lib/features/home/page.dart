@@ -35,7 +35,7 @@ class HomePage extends StatelessWidget {
                             ),
                             TextSpan(
                               text:
-                                  ': An indirect or deceptive device or stratagem. Refers especially to war and diplomatics.',
+                                  ': An indirect or deceptive device or stratagem.',
                             ),
                           ],
                         ),
