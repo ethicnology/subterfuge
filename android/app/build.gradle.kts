@@ -31,10 +31,12 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Disabled automatic signing to produce an unsigned debug APK.
+            signingConfig = null
+        }
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // No signing configuration: this will produce an unsigned release APK/AAB.
         }
     }
 }
