@@ -6,8 +6,8 @@ import 'package:subterfuge/features/home/page.dart';
 import 'package:subterfuge/shared/theme.dart';
 import 'package:window_manager/window_manager.dart';
 
-const Size _minimalSize = Size(400, 500);
-const Size _defaultSize = Size(900, 600);
+const Size _minimalSize = Size(320, 640);
+const Size _defaultSize = Size(450, 750);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
