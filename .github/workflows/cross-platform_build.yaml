@@ -12,6 +12,26 @@ env:
   # `curl | bash` installer below is reproducible instead of always fetching
   # whatever is latest at build time.
   FVM_VERSION: "4.1.2"
+  # Pinned commit of ethicnology/paraph (https://github.com/ethicnology/paraph),
+  # the cross-platform signing wrapper used to code-sign release artifacts
+  # below (apksigner/osslsigncode/rcodesign/gpg under the hood).
+  PARAPH_REF: "478e63ea65a04ff5afa3179238e2a967d20f2e3c"
+
+# Code-signing (only runs on push to `main`, never on pull_request, since
+# forked-repo PRs don't get secrets) needs these repository secrets. Signing
+# is skipped gracefully wherever its secret is absent — everything above
+# still builds and publishes an unsigned artifact + checksum.
+#
+#   Android (.apk):    ANDROID_KEYSTORE_BASE64 (base64 of the .keystore file),
+#                       ANDROID_ALIAS, ANDROID_PASS
+#   Windows (.msix):    WINDOWS_P12_BASE64 (base64 of the .p12 file), WINDOWS_PASS
+#   macOS (.dmg):       MAC_P12_BASE64 (base64 of the .p12 file), MAC_PASS,
+#                       MAC_CERT_SUBJECT (optional, defaults to "Subterfuge")
+#   Linux (.AppImage):  GPG_PRIVATE_KEY (ASCII-armored secret key), GPG_KEY_ID,
+#                       GPG_PASS
+#
+# See https://github.com/ethicnology/paraph#configuration for how to
+# generate each of these.
 
 jobs:
   # Gate every build job on analyze+test: this app handles cryptographic
@@ -35,6 +55,13 @@ jobs:
   macos-silicon:
     needs: test
     runs-on: macos-15
+    # Secrets cannot be referenced directly in `if:` conditionals, so mirror
+    # the ones needed for that into job-level env vars first (see
+    # https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions).
+    env:
+      MAC_P12_BASE64: ${{ secrets.MAC_P12_BASE64 }}
+      MAC_PASS: ${{ secrets.MAC_PASS }}
+      MAC_CERT_SUBJECT: ${{ secrets.MAC_CERT_SUBJECT }}
 
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
@@ -68,24 +95,50 @@ jobs:
             "Subterfuge-silicon.dmg" \
             "build/macos/Build/Products/Release/${{ env.APP_NAME }}.app"
 
-      # The release is not code-signed (no Apple Developer certificate
-      # configured in this repo), so a published checksum is the only
-      # integrity guarantee users have for this artifact. Always publish it
-      # alongside the binary.
+      # Sign with paraph (rcodesign under the hood) when MAC_P12_BASE64 is
+      # configured and we're on a push to main. Skipped otherwise (e.g. PRs
+      # from forks never have secrets) — the checksum step below then just
+      # publishes the unsigned .dmg instead.
+      - name: Sign DMG (paraph)
+        if: github.event_name == 'push' && env.MAC_P12_BASE64 != ''
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/rcodesign.tar.gz" "https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign%2F0.29.0/apple-codesign-0.29.0-macos-universal.tar.gz"
+          echo "d98372d5524226ccf9dc0eda03d4e4f5826182dabb2fc3f2bd303ed9113a748d  $RUNNER_TEMP/rcodesign.tar.gz" | shasum -a 256 -c -
+          tar -xzf "$RUNNER_TEMP/rcodesign.tar.gz" -C "$RUNNER_TEMP"
+          sudo mv "$RUNNER_TEMP"/apple-codesign-*/rcodesign /usr/local/bin/rcodesign
+
+          curl -fsSL -o "$RUNNER_TEMP/paraph.sh" "https://raw.githubusercontent.com/ethicnology/paraph/${{ env.PARAPH_REF }}/paraph.sh"
+          chmod +x "$RUNNER_TEMP/paraph.sh"
+
+          echo "$MAC_P12_BASE64" | base64 -d > "$RUNNER_TEMP/mac.p12"
+          export MAC_P12="$RUNNER_TEMP/mac.p12"
+          export MAC_CERT_SUBJECT="${MAC_CERT_SUBJECT:-Subterfuge}"
+
+          "$RUNNER_TEMP/paraph.sh" sign Subterfuge-silicon.dmg
+          "$RUNNER_TEMP/paraph.sh" verify Subterfuge-silicon-signed.dmg || true
+
       - name: Checksum
-        run: shasum -a 256 Subterfuge-silicon.dmg | tee Subterfuge-silicon.dmg.sha256
+        run: |
+          FILE=Subterfuge-silicon.dmg
+          if [ -f Subterfuge-silicon-signed.dmg ]; then FILE=Subterfuge-silicon-signed.dmg; fi
+          shasum -a 256 "$FILE" | tee "$FILE.sha256"
+          echo "DMG_FILE=$FILE" >> "$GITHUB_ENV"
 
       - name: Upload macOS Silicon DMG
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ env.APP_NAME }}-macos-silicon.dmg
           path: |
-            Subterfuge-silicon.dmg
-            Subterfuge-silicon.dmg.sha256
+            ${{ env.DMG_FILE }}
+            ${{ env.DMG_FILE }}.sha256
 
   android:
     needs: test
     runs-on: ubuntu-24.04
+    env:
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_ALIAS: ${{ secrets.ANDROID_ALIAS }}
+      ANDROID_PASS: ${{ secrets.ANDROID_PASS }}
 
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
@@ -104,25 +157,49 @@ jobs:
       - run: fvm flutter pub get
       - run: fvm flutter build apk --release
 
-      # The release APK is intentionally unsigned (see android/app/build.gradle.kts):
-      # it cannot be installed as-is and must be re-signed by whoever
-      # distributes it. Publish a checksum so at least this CI-built
-      # artifact's integrity can be verified before signing/redistribution.
+      # Gradle deliberately produces an unsigned APK (see
+      # android/app/build.gradle.kts); sign it here with paraph (apksigner
+      # under the hood) when ANDROID_KEYSTORE_BASE64 is configured and we're
+      # on a push to main. Skipped otherwise — the checksum step below then
+      # just publishes the unsigned APK instead.
+      - name: Sign APK (paraph)
+        if: github.event_name == 'push' && env.ANDROID_KEYSTORE_BASE64 != ''
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/paraph.sh" "https://raw.githubusercontent.com/ethicnology/paraph/${{ env.PARAPH_REF }}/paraph.sh"
+          chmod +x "$RUNNER_TEMP/paraph.sh"
+
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/android.keystore"
+          export ANDROID_KEYSTORE="$RUNNER_TEMP/android.keystore"
+
+          BUILD_TOOLS="$(find "$ANDROID_HOME/build-tools" -maxdepth 1 -mindepth 1 -type d | sort -V | tail -1)"
+          export PATH="$BUILD_TOOLS:$PATH"
+
+          "$RUNNER_TEMP/paraph.sh" sign build/app/outputs/flutter-apk/app-release.apk
+          "$RUNNER_TEMP/paraph.sh" verify build/app/outputs/flutter-apk/app-release-signed.apk || true
+
       - name: Checksum
         working-directory: build/app/outputs/flutter-apk
-        run: sha256sum app-release.apk | tee app-release.apk.sha256
+        run: |
+          FILE=app-release.apk
+          if [ -f app-release-signed.apk ]; then FILE=app-release-signed.apk; fi
+          sha256sum "$FILE" | tee "$FILE.sha256"
+          echo "APK_FILE=$FILE" >> "$GITHUB_ENV"
 
       - name: Upload Android APK
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ env.APP_NAME }}-android.apk
           path: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/flutter-apk/app-release.apk.sha256
+            build/app/outputs/flutter-apk/${{ env.APK_FILE }}
+            build/app/outputs/flutter-apk/${{ env.APK_FILE }}.sha256
 
   linux-x64:
     needs: test
     runs-on: ubuntu-24.04
+    env:
+      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
+      GPG_PASS: ${{ secrets.GPG_PASS }}
 
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
@@ -153,6 +230,21 @@ jobs:
       - name: Build AppImage
         run: appimage-builder --recipe appimage_builder_x64.yml --skip-test
 
+      # Sign with paraph (a detached gpg signature) when GPG_PRIVATE_KEY is
+      # configured and we're on a push to main. Skipped otherwise — the
+      # checksum step below then just publishes the unsigned .AppImage.
+      - name: Sign AppImage (paraph)
+        if: github.event_name == 'push' && env.GPG_PRIVATE_KEY != ''
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/paraph.sh" "https://raw.githubusercontent.com/ethicnology/paraph/${{ env.PARAPH_REF }}/paraph.sh"
+          chmod +x "$RUNNER_TEMP/paraph.sh"
+
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --yes --import
+
+          APPIMAGE_FILE="$(ls ./*.AppImage | head -1)"
+          "$RUNNER_TEMP/paraph.sh" sign "$APPIMAGE_FILE"
+          "$RUNNER_TEMP/paraph.sh" verify "$APPIMAGE_FILE" || true
+
       - name: Checksum
         run: sha256sum ./*.AppImage | tee AppImage.sha256
 
@@ -162,11 +254,16 @@ jobs:
           name: ${{ env.APP_NAME }}-linux-x64.AppImage
           path: |
             *.AppImage
+            *.AppImage.sig
             AppImage.sha256
+          if-no-files-found: warn
 
   windows:
     needs: test
     runs-on: windows-2025
+    env:
+      WINDOWS_P12_BASE64: ${{ secrets.WINDOWS_P12_BASE64 }}
+      WINDOWS_PASS: ${{ secrets.WINDOWS_PASS }}
 
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
@@ -179,17 +276,42 @@ jobs:
       - run: fvm flutter build windows --release
       - run: fvm dart run msix:create
 
-      # The MSIX is not signed with a trusted code-signing certificate
-      # (install_certificate: false in pubspec.yaml), so publish a checksum
-      # as the only integrity guarantee for this artifact.
+      # msix:create produces an unsigned package (install_certificate: false
+      # in pubspec.yaml); sign it here with paraph (osslsigncode under the
+      # hood) when WINDOWS_P12_BASE64 is configured and we're on a push to
+      # main. Skipped otherwise — the checksum step below then just
+      # publishes the unsigned .msix instead. Runs under bash (paraph.sh is
+      # a bash script; Git Bash ships on GitHub's Windows runners).
+      - name: Sign MSIX (paraph)
+        if: github.event_name == 'push' && env.WINDOWS_P12_BASE64 != ''
+        shell: bash
+        run: |
+          choco install osslsigncode -y --no-progress
+
+          curl -fsSL -o "$RUNNER_TEMP/paraph.sh" "https://raw.githubusercontent.com/ethicnology/paraph/${{ env.PARAPH_REF }}/paraph.sh"
+          chmod +x "$RUNNER_TEMP/paraph.sh"
+
+          echo "$WINDOWS_P12_BASE64" | base64 -d > "$RUNNER_TEMP/windows.p12"
+          export WINDOWS_P12="$RUNNER_TEMP/windows.p12"
+
+          MSIX_FILE="$(ls build/windows/x64/runner/Release/*.msix | head -1)"
+          "$RUNNER_TEMP/paraph.sh" sign "$MSIX_FILE"
+          SIGNED_MSIX="${MSIX_FILE%.msix}-signed.msix"
+          "$RUNNER_TEMP/paraph.sh" verify "$SIGNED_MSIX" || true
+
       - name: Checksum
         working-directory: build\windows\x64\runner\Release
-        run: Get-FileHash -Algorithm SHA256 *.msix | Format-List | Out-File -Encoding utf8 msix.sha256
+        shell: pwsh
+        run: |
+          $file = Get-ChildItem -Filter "*-signed.msix" | Select-Object -First 1
+          if (-not $file) { $file = Get-ChildItem -Filter "*.msix" | Select-Object -First 1 }
+          Get-FileHash -Algorithm SHA256 $file.Name | Format-List | Out-File -Encoding utf8 "$($file.Name).sha256"
+          echo "MSIX_FILE=$($file.Name)" >> $env:GITHUB_ENV
 
       - name: Upload Windows MSIX
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ env.APP_NAME }}-windows-x64.msix
           path: |
-            build\windows\x64\runner\Release\*.msix
-            build\windows\x64\runner\Release\msix.sha256
+            build\windows\x64\runner\Release\${{ env.MSIX_FILE }}
+            build\windows\x64\runner\Release\${{ env.MSIX_FILE }}.sha256
