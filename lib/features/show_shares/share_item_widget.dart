@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:subterfuge/shared/secure_clipboard.dart';
 
 class ShareItemWidget extends StatelessWidget {
   final String share;
@@ -18,10 +18,7 @@ class ShareItemWidget extends StatelessWidget {
         children: [
           SelectableText(
             share,
-            style: const TextStyle(
-              fontFamily: 'monospace',
-              fontSize: 13,
-            ),
+            style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
             showCursor: false,
             contextMenuBuilder: (context, editableTextState) {
               return AdaptiveTextSelectionToolbar.editableText(
@@ -31,17 +28,11 @@ class ShareItemWidget extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           OutlinedButton.icon(
-            onPressed: () async {
-              await Clipboard.setData(ClipboardData(text: share));
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Share copied to clipboard'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              }
-            },
+            onPressed: () => copySensitiveToClipboard(
+              context,
+              label: 'Share',
+              content: share,
+            ),
             icon: const Icon(Icons.copy_rounded),
             label: const Text('Copy Share'),
           ),

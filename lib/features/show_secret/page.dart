@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:subterfuge/features/show_secret/cubit.dart';
 import 'package:subterfuge/features/show_secret/state.dart';
+import 'package:subterfuge/shared/secure_clipboard.dart';
 
 class ShowSecretPage extends StatelessWidget {
   final Uint8List secret;
@@ -220,17 +221,11 @@ class _SecretCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             OutlinedButton.icon(
-              onPressed: () async {
-                await Clipboard.setData(ClipboardData(text: content));
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('$title copied to clipboard'),
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                }
-              },
+              onPressed: () => copySensitiveToClipboard(
+                context,
+                label: title,
+                content: content,
+              ),
               icon: const Icon(Icons.copy_rounded),
               label: const Text('Copy'),
             ),
