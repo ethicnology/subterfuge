@@ -233,12 +233,33 @@ class _MnemonicWidgetState extends State<MnemonicWidget> {
       } catch (e) {
         // if checksum is invalid, clear the last word
         if (e is bip39.MnemonicInvalidChecksumException) words.last = '';
-        setState(() => _error = MnemonicException(e.toString()));
+        // Note: bip39_mnemonic's own exceptions embed the offending word(s)
+        // in their message. We deliberately do not forward that text
+        // (see MnemonicException docs) and show a fixed, safe message instead.
+        setState(() => _error = _mapMnemonicException(e));
         return;
       }
     } else {
       setState(() => _error = EmptyMnemonicWordsError());
     }
+  }
+
+  /// Maps an exception thrown while validating/building the mnemonic to a
+  /// fixed, safe [MnemonicException]. Never forwards `e.toString()` for
+  /// bip39_mnemonic exceptions: they embed the actual word(s) the user typed
+  /// (see [bip39.MnemonicWordNotFoundException] and
+  /// [bip39.MnemonicInvalidChecksumException]).
+  MnemonicException _mapMnemonicException(Object e) {
+    if (e is bip39.MnemonicInvalidChecksumException) {
+      return MnemonicException('Invalid checksum. Please review your words.');
+    }
+    if (e is bip39.MnemonicWordNotFoundException) {
+      return MnemonicException('One or more words are not valid BIP-39 words.');
+    }
+    if (e is bip39.MnemonicException) {
+      return MnemonicException('Invalid mnemonic. Please check your words.');
+    }
+    return MnemonicException('Unexpected error. Please check your words.');
   }
 
   void updateMnemonic(({int index, String word}) value) {

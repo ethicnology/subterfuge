@@ -25,11 +25,7 @@ class ShareSecretCubit extends Cubit<ShareSecretState> {
 
       emit(state.copyWith(shares: secretShares));
     } catch (e) {
-      if (e is AppError) {
-        emit(state.copyWith(error: AppError(e.message)));
-      } else {
-        emit(state.copyWith(error: AppError(e.toString())));
-      }
+      emit(state.copyWith(error: toSafeAppError(e)));
     } finally {
       emit(state.copyWith(isLoading: false));
     }

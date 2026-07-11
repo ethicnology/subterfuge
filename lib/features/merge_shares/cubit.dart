@@ -25,11 +25,7 @@ class MergeSharesCubit extends Cubit<MergeSharesState> {
 
       emit(state.copyWith(secret: secret));
     } catch (e) {
-      if (e is AppError) {
-        emit(state.copyWith(error: AppError(e.message)));
-      } else {
-        emit(state.copyWith(error: AppError(e.toString())));
-      }
+      emit(state.copyWith(error: toSafeAppError(e)));
     }
   }
 
