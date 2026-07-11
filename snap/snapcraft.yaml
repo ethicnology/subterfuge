@@ -1,5 +1,5 @@
 name: subterfuge
-version: 1.0.0
+version: 2.0.0
 summary: Shamir Secret Sharing SLIP39
 description: A Shamir secret sharing experience using SLIP39 implementation.
 
