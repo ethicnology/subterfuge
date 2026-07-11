@@ -18,7 +18,18 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Subterfuge: a Shamir Secret Sharing tool implementing the SLIP-39 standard.">
+
+  <!--
+    Restrictive Content-Security-Policy: this app processes cryptographic
+    secrets (mnemonics/seeds/shares) entirely client-side and performs no
+    network requests of its own. Blocking cross-origin script/connect
+    sources mitigates data exfiltration if a browser extension or a
+    supply-chain issue ever tries to inject/call out. Adjust if the Flutter
+    web renderer you build with requires additional 'wasm-unsafe-eval' /
+    'unsafe-inline' sources.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none';">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
