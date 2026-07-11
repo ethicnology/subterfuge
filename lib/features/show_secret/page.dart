@@ -55,7 +55,38 @@ class _ShowSecretViewState extends State<_ShowSecretView> {
                     size: 64,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.errorContainer.withValues(alpha: 0.4),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.warning_amber_rounded,
+                          color: Theme.of(context).colorScheme.error,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'If a passphrase was used and it was incorrect, '
+                            'SLIP-39 silently returns a different, still '
+                            'valid-looking secret. Always verify the '
+                            'Extended Public Key (or addresses) below '
+                            'against your wallet before relying on this.',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   _SecretCard(
                     title: state.isEntropy ? 'Mnemonic' : 'Seed',
                     icon: state.isEntropy
