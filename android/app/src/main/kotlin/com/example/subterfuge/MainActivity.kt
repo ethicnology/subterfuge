@@ -8,6 +8,10 @@ import io.flutter.embedding.android.FlutterActivity
 // FLAG_SECURE prevents this window's content from appearing in
 // screenshots, screen recordings/casting, and the "Recent apps" (task
 // switcher) thumbnail on Android.
+//
+// (Marking clipboard content as sensitive on Android 13+ is handled by the
+// `sensitive_clipboard` package instead of custom platform-channel code
+// here — see lib/shared/secure_clipboard.dart.)
 class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         window.setFlags(
