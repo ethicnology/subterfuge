@@ -49,7 +49,9 @@ class SupportDeveloperWidget extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: () {
                       launchUrl(
-                        Uri.parse('http://support.ethicnology.com?app=furtive'),
+                        Uri.parse(
+                          'http://support.ethicnology.com?app=subterfuge',
+                        ),
                       );
                     },
                     icon: const Icon(Icons.volunteer_activism_rounded),
