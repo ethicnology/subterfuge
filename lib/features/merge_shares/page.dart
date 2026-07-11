@@ -17,6 +17,15 @@ class _RecoverSecretScreenState extends State<MergeSharesPage> {
   final Map<int, TextEditingController> shareControllers = {};
 
   @override
+  void dispose() {
+    passphraseController.dispose();
+    for (final controller in shareControllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => MergeSharesCubit(),
@@ -68,6 +77,7 @@ class _RecoverSecretScreenState extends State<MergeSharesPage> {
                                 decoration: const InputDecoration(
                                   border: UnderlineInputBorder(),
                                   labelText: 'Shares',
+                                  helperText: 'Exactly the threshold count',
                                 ),
                                 validator: (value) {
                                   if (value == null ||
@@ -138,7 +148,18 @@ class _RecoverSecretScreenState extends State<MergeSharesPage> {
                               final shares = <String>[];
                               for (int i = 0; i < state.sharesCount; i++) {
                                 final input = shareControllers[i]?.text ?? '';
-                                shares.add(input.trim());
+                                // Normalize pasted content: collapse any
+                                // run of whitespace (newlines, tabs, double
+                                // spaces from copy/paste) into single spaces
+                                // and lowercase, since slip39 splits words
+                                // on a single ' ' and the wordlist is
+                                // lowercase.
+                                shares.add(
+                                  input.trim().toLowerCase().replaceAll(
+                                    RegExp(r'\s+'),
+                                    ' ',
+                                  ),
+                                );
                               }
 
                               cubit.mergeShares(
