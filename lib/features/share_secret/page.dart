@@ -118,6 +118,9 @@ class _ShareSecretState extends State<ShareSecretPage> {
                             child: TextFormField(
                               controller: secret,
                               readOnly: widget.secret != null,
+                              enableSuggestions: false,
+                              autocorrect: false,
+                              keyboardType: TextInputType.visiblePassword,
                               autovalidateMode: .onUserInteraction,
                               decoration: const InputDecoration(
                                 border: UnderlineInputBorder(),
@@ -132,8 +135,14 @@ class _ShareSecretState extends State<ShareSecretPage> {
                                 if (value.length < 32) {
                                   return 'At least 32 characters (16 bytes)';
                                 }
-                                if (!((value.length % 2) == 0)) {
-                                  return 'Not an even number of characters';
+                                if (value.length > 128) {
+                                  return 'At most 128 characters (64 bytes)';
+                                }
+                                // SLIP-39 requires an even number of BYTES,
+                                // i.e. a hex string length that is a
+                                // multiple of 4 (2 hex chars per byte).
+                                if (value.length % 4 != 0) {
+                                  return 'Must be a multiple of 4 characters (whole bytes, even count)';
                                 }
                                 try {
                                   hex.decode(value);
@@ -182,6 +191,13 @@ class _ShareSecretState extends State<ShareSecretPage> {
                                         labelText: 'Participants',
                                       ),
                                       autovalidateMode: .onUserInteraction,
+                                      onChanged: (_) {
+                                        // Re-validate the threshold field
+                                        // whenever participants changes, so
+                                        // "threshold <= participants" is
+                                        // always enforced live.
+                                        _formKey.currentState?.validate();
+                                      },
                                       validator: (value) {
                                         if (value == null ||
                                             value.isEmpty ||
@@ -216,9 +232,18 @@ class _ShareSecretState extends State<ShareSecretPage> {
                                             int.tryParse(value) == null) {
                                           return 'Between 1 and 16';
                                         }
-                                        if (int.parse(value) < 1 ||
-                                            int.parse(value) > 16) {
+                                        final thresholdValue = int.parse(value);
+                                        if (thresholdValue < 1 ||
+                                            thresholdValue > 16) {
                                           return 'Between 1 and 16';
+                                        }
+                                        final participantsValue = int.tryParse(
+                                          participants.text,
+                                        );
+                                        if (participantsValue != null &&
+                                            thresholdValue >
+                                                participantsValue) {
+                                          return 'Cannot exceed participants ($participantsValue)';
                                         }
                                         return null;
                                       },
