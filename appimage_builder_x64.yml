@@ -14,12 +14,11 @@ AppDir:
     id: com.ethicnology.subterfuge
     name: Subterfuge
     icon: subterfuge
-    version: 1.2.0
+    version: 2.0.0
     exec: subterfuge
     exec_args: $@
   apt:
     arch: amd64
-    allow_unauthenticated: true
     sources:
       - sourceline: deb http://archive.ubuntu.com/ubuntu/ noble main restricted universe multiverse
       - sourceline: deb http://archive.ubuntu.com/ubuntu/ noble-updates main restricted universe multiverse

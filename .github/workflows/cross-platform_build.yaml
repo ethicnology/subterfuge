@@ -3,24 +3,49 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 env:
   APP_NAME: subterfuge
+  # Pinned FVM CLI version (not just the Flutter SDK pinned in .fvmrc) so the
+  # `curl | bash` installer below is reproducible instead of always fetching
+  # whatever is latest at build time.
+  FVM_VERSION: "4.1.2"
 
 jobs:
-  macos-silicon:
-    runs-on: macos-15
+  # Gate every build job on analyze+test: this app handles cryptographic
+  # secrets (mnemonics/seeds/shares), a broken build must never be shipped.
+  test:
+    runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
       - name: Install FVM
         run: |
-          curl -fsSL https://fvm.app/install.sh | bash
+          curl -fsSL https://fvm.app/install.sh | bash -s -- "$FVM_VERSION"
           echo "$HOME/fvm/bin" >> $GITHUB_PATH
 
       - run: fvm install
       - run: fvm flutter pub get
-      - run: fvm dart run build_runner build --delete-conflicting-outputs
+      - run: fvm flutter analyze
+      - run: fvm flutter test
+
+  macos-silicon:
+    needs: test
+    runs-on: macos-15
+
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+
+      - name: Install FVM
+        run: |
+          curl -fsSL https://fvm.app/install.sh | bash -s -- "$FVM_VERSION"
+          echo "$HOME/fvm/bin" >> $GITHUB_PATH
+
+      - run: fvm install
+      - run: fvm flutter pub get
       - run: fvm flutter precache --macos
       - run: cd macos && pod install --repo-update && cd -
 
@@ -40,21 +65,31 @@ jobs:
             --icon "${{ env.APP_NAME }}.app" 200 190 \
             --hide-extension "${{ env.APP_NAME }}.app" \
             --app-drop-link 600 185 \
-            "Subterfuge-1.2.0-silicon.dmg" \
+            "Subterfuge-silicon.dmg" \
             "build/macos/Build/Products/Release/${{ env.APP_NAME }}.app"
 
+      # The release is not code-signed (no Apple Developer certificate
+      # configured in this repo), so a published checksum is the only
+      # integrity guarantee users have for this artifact. Always publish it
+      # alongside the binary.
+      - name: Checksum
+        run: shasum -a 256 Subterfuge-silicon.dmg | tee Subterfuge-silicon.dmg.sha256
+
       - name: Upload macOS Silicon DMG
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ env.APP_NAME }}-macos-silicon.dmg
-          path: Subterfuge-1.2.0-silicon.dmg
+          path: |
+            Subterfuge-silicon.dmg
+            Subterfuge-silicon.dmg.sha256
 
   android:
+    needs: test
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-java@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a # v5
         with:
           distribution: "temurin"
           java-version: "17"
@@ -62,37 +97,46 @@ jobs:
 
       - name: Install FVM
         run: |
-          curl -fsSL https://fvm.app/install.sh | bash
+          curl -fsSL https://fvm.app/install.sh | bash -s -- "$FVM_VERSION"
           echo "$HOME/fvm/bin" >> $GITHUB_PATH
 
       - run: fvm install
       - run: fvm flutter pub get
-      - run: fvm dart run build_runner build --delete-conflicting-outputs
       - run: fvm flutter build apk --release
 
+      # The release APK is intentionally unsigned (see android/app/build.gradle.kts):
+      # it cannot be installed as-is and must be re-signed by whoever
+      # distributes it. Publish a checksum so at least this CI-built
+      # artifact's integrity can be verified before signing/redistribution.
+      - name: Checksum
+        working-directory: build/app/outputs/flutter-apk
+        run: sha256sum app-release.apk | tee app-release.apk.sha256
+
       - name: Upload Android APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ env.APP_NAME }}-android.apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/flutter-apk/app-release.apk.sha256
 
   linux-x64:
+    needs: test
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
       - run: sudo apt-get update
       - run: sudo apt-get install build-essential libgtk-3-dev
 
       - name: Install FVM
         run: |
-          curl -fsSL https://fvm.app/install.sh | bash
+          curl -fsSL https://fvm.app/install.sh | bash -s -- "$FVM_VERSION"
           echo "$HOME/fvm/bin" >> $GITHUB_PATH
 
       - run: fvm install
       - run: fvm flutter pub get
-      - run: fvm dart run build_runner build --delete-conflicting-outputs
       - run: fvm flutter config --enable-linux-desktop
       - run: fvm flutter build linux --release --target-platform=linux-x64
 
@@ -101,36 +145,51 @@ jobs:
 
       - name: Install appimage-builder
         run: |
-          wget -O appimage-builder-x86_64.AppImage https://github.com/AppImageCrafters/appimage-builder/releases/download/v1.1.0/appimage-builder-1.1.0-x86_64.AppImage
+          curl -fsSL -o appimage-builder-x86_64.AppImage https://github.com/AppImageCrafters/appimage-builder/releases/download/v1.1.0/appimage-builder-1.1.0-x86_64.AppImage
+          echo "4b4f99cae9291d78ba12dbdabca7c0a67c72aa61eb2e5d424089171a9485e96f  appimage-builder-x86_64.AppImage" | sha256sum -c -
           chmod +x appimage-builder-x86_64.AppImage
           sudo mv appimage-builder-x86_64.AppImage /usr/local/bin/appimage-builder
 
       - name: Build AppImage
         run: appimage-builder --recipe appimage_builder_x64.yml --skip-test
 
+      - name: Checksum
+        run: sha256sum ./*.AppImage | tee AppImage.sha256
+
       - name: Upload Linux x64 AppImage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ env.APP_NAME }}-linux-x64.AppImage
-          path: "*.AppImage"
+          path: |
+            *.AppImage
+            AppImage.sha256
 
   windows:
+    needs: test
     runs-on: windows-2025
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
-      - run: choco install fvm
+      - run: choco install fvm --version=${{ env.FVM_VERSION }}
       - run: fvm install
       - run: fvm flutter pub get
-      - run: fvm dart run build_runner build --delete-conflicting-outputs
 
       - run: fvm flutter config --enable-windows-desktop
       - run: fvm flutter build windows --release
       - run: fvm dart run msix:create
 
+      # The MSIX is not signed with a trusted code-signing certificate
+      # (install_certificate: false in pubspec.yaml), so publish a checksum
+      # as the only integrity guarantee for this artifact.
+      - name: Checksum
+        working-directory: build\windows\x64\runner\Release
+        run: Get-FileHash -Algorithm SHA256 *.msix | Format-List | Out-File -Encoding utf8 msix.sha256
+
       - name: Upload Windows MSIX
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ env.APP_NAME }}-windows-x64.msix
-          path: build\windows\x64\runner\Release\*.msix
+          path: |
+            build\windows\x64\runner\Release\*.msix
+            build\windows\x64\runner\Release\msix.sha256
