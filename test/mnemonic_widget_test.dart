@@ -147,7 +147,13 @@ void main() {
         final fields = find.byType(TextField);
         await tester.enterText(fields.at(0), 'ab');
         await tester.pump();
-        await tester.tap(fields.at(1));
+        // Field 1 sits directly under field 0 in the same column, which the
+        // floating suggestions card (shown for field 0's ambiguous 'ab')
+        // legitimately overlaps — the same way any autocomplete dropdown
+        // overlays whatever's behind it. Request focus directly rather
+        // than tapping through a finder, to test navigation independently
+        // of that overlap.
+        tester.widget<TextField>(fields.at(1)).focusNode!.requestFocus();
         await tester.pump();
 
         expect(
@@ -195,9 +201,48 @@ void main() {
     );
 
     testWidgets(
-      'shows inline suggestions only for the focused field, and hides '
-      'them again once focus moves to another field',
+      'shows a floating suggestion card anchored under the focused field '
+      'when no on-screen keyboard is up (desktop/physical keyboard), and '
+      'hides it again once focus moves elsewhere',
       (tester) async {
+        await tester.pumpWidget(
+          _wrap(
+            MnemonicWidget(
+              allowLanguageSelection: false,
+              allowLengthSelection: false,
+              allowPassphrase: false,
+              allowAutoFillWords: false,
+              onSubmit: (_) {},
+            ),
+          ),
+        );
+
+        // No on-screen keyboard is simulated in this test environment
+        // (viewInsets.bottom == 0), so an ambiguous prefix surfaces the
+        // floating presentation.
+        final fields = find.byType(TextField);
+        await tester.enterText(fields.at(0), 'ab');
+        await tester.pump();
+
+        expect(find.text('abandon'), findsOneWidget);
+
+        tester.widget<TextField>(fields.at(1)).focusNode!.requestFocus();
+        await tester.pump();
+
+        // Field 0's suggestions disappear once it's no longer focused,
+        // even though its text is still the ambiguous 'ab'.
+        expect(find.text('abandon'), findsNothing);
+        expect(find.text('ab'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'docks the suggestion bar above the on-screen keyboard instead, '
+      'when one is currently shown',
+      (tester) async {
+        tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+        addTearDown(tester.view.resetViewInsets);
+
         await tester.pumpWidget(
           _wrap(
             MnemonicWidget(
@@ -215,13 +260,6 @@ void main() {
         await tester.pump();
 
         expect(find.text('abandon'), findsOneWidget);
-
-        await tester.tap(fields.at(1));
-        await tester.pump();
-
-        // Field 0's suggestions disappear once it's no longer focused,
-        // even though its text is still the ambiguous 'ab'.
-        expect(find.text('abandon'), findsNothing);
       },
     );
   });

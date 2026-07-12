@@ -178,6 +178,21 @@ class MnemonicWidgetStyle {
   }
 }
 
+/// A full BIP-39 mnemonic entry form: per-word inputs, optional length/
+/// language pickers, an optional passphrase field, and a Submit button.
+///
+/// Shows a suggestion bar for whichever word is currently ambiguous
+/// (multiple dictionary words still match the typed prefix) — docked right
+/// above the system keyboard while it's visible (phone/tablet), or floating
+/// under the focused field otherwise (desktop, or a physical keyboard with
+/// no on-screen one to dock against). See [_MnemonicWidgetState.build].
+///
+/// IMPORTANT: this reads the raw, unconsumed [MediaQueryData.viewInsets] to
+/// tell whether the system keyboard is currently shown, which requires the
+/// host `Scaffold` to set `resizeToAvoidBottomInset: false` — otherwise the
+/// default `true` makes the Scaffold consume that inset for its own body
+/// resizing and this widget always sees zero, permanently choosing the
+/// floating presentation even with the keyboard up.
 class MnemonicWidget extends StatefulWidget {
   final bip39.MnemonicLength length;
   final bip39.Language language;
@@ -212,12 +227,101 @@ class _MnemonicWidgetState extends State<MnemonicWidget> {
   String passphrase = '';
   String label = '';
 
+  // One FocusNode/LayerLink per word, owned here (rather than by
+  // MnemonicSentenceWidget) because the shared suggestion bar below needs
+  // both: which field is currently focused (to know what to suggest), and
+  // that field's LayerLink (to anchor the floating variant under it via
+  // CompositedTransformFollower).
+  List<FocusNode> _focusNodes = [];
+  List<LayerLink> _layerLinks = [];
+  int? _focusedIndex;
+  final _suggestionsController = OverlayPortalController();
+
   @override
   void initState() {
     super.initState();
     length = widget.length;
     language = widget.language;
     words = List<String>.filled(length.words, '');
+    _initializeFocusNodes();
+    _suggestionsController.show();
+  }
+
+  @override
+  void dispose() {
+    _disposeFocusNodes();
+    super.dispose();
+  }
+
+  void _initializeFocusNodes() {
+    _focusNodes = List.generate(words.length, (index) {
+      final node = FocusNode();
+      node.addListener(() => _handleFocusChange(index, node));
+      return node;
+    });
+    _layerLinks = List.generate(words.length, (_) => LayerLink());
+  }
+
+  void _disposeFocusNodes() {
+    for (final node in _focusNodes) {
+      node.dispose();
+    }
+    _focusNodes = [];
+    _layerLinks = [];
+  }
+
+  void _handleFocusChange(int index, FocusNode node) {
+    if (node.hasFocus) {
+      setState(() => _focusedIndex = index);
+    } else if (_focusedIndex == index) {
+      setState(() => _focusedIndex = null);
+    }
+  }
+
+  /// Advances to the next field, or — for the last word — dismisses the
+  /// keyboard and submits the whole form, since there's no next field to
+  /// advance to. Called both for the keyboard's Next/Done action and for
+  /// auto-fill/tapped-suggestion completions (see [_selectSuggestion]).
+  void _completeWord(int index) {
+    if (index == words.length - 1) {
+      FocusScope.of(context).unfocus();
+      onSubmit();
+    } else if (index + 1 < _focusNodes.length) {
+      FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
+    }
+  }
+
+  void _selectSuggestion(int index, String word) {
+    setState(() => words[index] = word);
+    _completeWord(index);
+  }
+
+  /// Schedules auto-fill for [index] for next frame, only when its typed
+  /// prefix uniquely matches one dictionary word it doesn't already equal.
+  ///
+  /// The equality check is what stops this from rescheduling on every
+  /// rebuild forever once resolved — omitting it previously caused an
+  /// infinite frame-scheduling loop that pinned the UI thread at 100% CPU
+  /// (see git history on this file).
+  void _maybeScheduleAutoFill(int index, List<String> hints) {
+    if (!widget.allowAutoFillWords || hints.length != 1) return;
+    final word = words[index];
+    final resolved = hints.first;
+    if (word.isEmpty || resolved == word) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _focusedIndex != index || words[index] != word) {
+        return; // Stale: focus or text changed since this was scheduled.
+      }
+      _selectSuggestion(index, resolved);
+    });
+  }
+
+  List<String> _hintsFor(int? index) {
+    if (index == null) return const [];
+    final word = words[index];
+    if (word.isEmpty) return const [];
+    return language.list.where((candidate) => candidate.startsWith(word)).toList();
   }
 
   void onSubmit() {
@@ -276,20 +380,55 @@ class _MnemonicWidgetState extends State<MnemonicWidget> {
   void changeMnemonicLength(bip39.MnemonicLength length) {
     this.length = length;
     words = List<String>.filled(length.words, '');
-    setState(() => _error = null);
+    _disposeFocusNodes();
+    _initializeFocusNodes();
+    setState(() {
+      _error = null;
+      _focusedIndex = null;
+    });
   }
 
   void changeMnemonicLanguage(bip39.Language language) {
     this.language = language;
     words = List<String>.filled(length.words, '');
-    setState(() => _error = null);
+    _disposeFocusNodes();
+    _initializeFocusNodes();
+    setState(() {
+      _error = null;
+      _focusedIndex = null;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final style = widget.style ?? const MnemonicWidgetStyle();
+    final focusedIndex = _focusedIndex;
+    final hints = _hintsFor(focusedIndex);
+    if (focusedIndex != null) _maybeScheduleAutoFill(focusedIndex, hints);
 
-    return SingleChildScrollView(
+    // A field's suggestions are worth showing whenever its typed prefix is
+    // ambiguous (multiple dictionary words still match): an unambiguous
+    // single match is handled by auto-fill instead (see
+    // _maybeScheduleAutoFill) and never reaches here.
+    final hasSuggestions = focusedIndex != null && hints.length > 1;
+
+    // `viewInsets.bottom` is the system keyboard's height while it's shown
+    // — see MnemonicWidget's class doc for why the host must disable
+    // Scaffold's own keyboard avoidance for this to be meaningful here.
+    // While it's up (typically a phone/tablet's on-screen keyboard),
+    // suggestions dock in the same place a predictive-text bar normally
+    // sits: right above it, full width. Otherwise (desktop, or a physical
+    // keyboard with no on-screen one to dock against) they float in a small
+    // card anchored directly under the focused field instead.
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final dockedVisible = hasSuggestions && keyboardHeight > 0;
+    final floatingVisible = hasSuggestions && keyboardHeight == 0;
+    final dockedBarHeight = style.inputHeight + style.standardSpacing;
+
+    final content = SingleChildScrollView(
+      padding: EdgeInsets.only(
+        bottom: keyboardHeight + (dockedVisible ? dockedBarHeight : 0),
+      ),
       child: Column(
         children: [
           if (widget.allowLanguageSelection || widget.allowLengthSelection) ...[
@@ -319,9 +458,10 @@ class _MnemonicWidgetState extends State<MnemonicWidget> {
             words: words,
             language: language,
             onWordChanged: updateMnemonic,
-            allowAutoFillWords: widget.allowAutoFillWords,
             style: style,
-            onSubmit: onSubmit,
+            focusNodes: _focusNodes,
+            layerLinks: _layerLinks,
+            onWordComplete: _completeWord,
           ),
           if (widget.allowPassphrase) ...[
             SizedBox(height: style.standardSpacing),
@@ -354,6 +494,95 @@ class _MnemonicWidgetState extends State<MnemonicWidget> {
         ],
       ),
     );
+
+    return Stack(
+      children: [
+        Positioned.fill(child: content),
+        // Wrapped in Positioned.fill (rather than left bare) so this
+        // doesn't count as Stack's one "non-positioned" child: a bare,
+        // non-Positioned OverlayPortal has ~zero intrinsic size in its own
+        // normal-flow slot (its actual content renders elsewhere, in the
+        // Overlay), which would make the whole Stack collapse to that size
+        // instead of filling the available space.
+        Positioned.fill(
+          child: OverlayPortal(
+            controller: _suggestionsController,
+            overlayChildBuilder: (context) {
+              if (!floatingVisible) return const SizedBox.shrink();
+              return CompositedTransformFollower(
+                link: _layerLinks[focusedIndex],
+                targetAnchor: Alignment.bottomLeft,
+                followerAnchor: Alignment.topLeft,
+                offset: const Offset(0, 4),
+                child: _SuggestionsCard(
+                  hints: hints,
+                  style: style,
+                  width: 220,
+                  onSelect: (word) => _selectSuggestion(focusedIndex, word),
+                ),
+              );
+            },
+          ),
+        ),
+        if (dockedVisible)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: keyboardHeight,
+            child: _SuggestionsCard(
+              hints: hints,
+              style: style,
+              onSelect: (word) => _selectSuggestion(focusedIndex, word),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// A horizontally-scrollable row of candidate words, shared by both the
+/// "docked above the keyboard" and "floating under the field" presentations
+/// of [MnemonicWidget]'s suggestion bar.
+class _SuggestionsCard extends StatelessWidget {
+  final List<String> hints;
+  final MnemonicWidgetStyle style;
+  final ValueChanged<String> onSelect;
+
+  /// Constrains the card to a fixed width for the floating (anchored)
+  /// presentation. `null` (the default) makes it stretch full-width, for
+  /// the bar docked above the keyboard.
+  final double? width;
+
+  const _SuggestionsCard({
+    required this.hints,
+    required this.style,
+    required this.onSelect,
+    this.width,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      child: Container(
+        width: width,
+        height: style.inputHeight,
+        padding: EdgeInsets.all(style.smallPadding),
+        decoration: style.standardDecoration(context),
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: hints.length,
+          separatorBuilder: (_, _) => SizedBox(width: style.standardSpacing),
+          itemBuilder: (context, index) {
+            final hint = hints[index];
+            return _HintChip(
+              word: hint,
+              onTap: () => onSelect(hint),
+              style: style,
+            );
+          },
+        ),
+      ),
+    );
   }
 }
 
@@ -377,7 +606,6 @@ class MnemonicWord extends StatefulWidget {
   final VoidCallback onBackspaceEmpty;
   final String word;
   final MnemonicWidgetStyle style;
-  final bool allowAutoFillWords;
   final TextInputAction textInputAction;
 
   const MnemonicWord({
@@ -390,7 +618,6 @@ class MnemonicWord extends StatefulWidget {
     required this.onComplete,
     required this.onBackspaceEmpty,
     required this.style,
-    this.allowAutoFillWords = true,
     this.textInputAction = TextInputAction.next,
   });
 
@@ -405,7 +632,6 @@ class MnemonicWordState extends State<MnemonicWord> {
   void initState() {
     super.initState();
     _controller.text = widget.word;
-    widget.focusNode.addListener(_handleFocusChange);
     HardwareKeyboard.instance.addHandler(_handleKeyEvent);
   }
 
@@ -415,23 +641,14 @@ class MnemonicWordState extends State<MnemonicWord> {
     if (widget.word != oldWidget.word && widget.word != _controller.text) {
       _controller.text = widget.word;
     }
-    if (widget.focusNode != oldWidget.focusNode) {
-      oldWidget.focusNode.removeListener(_handleFocusChange);
-      widget.focusNode.addListener(_handleFocusChange);
-    }
   }
 
   @override
   void dispose() {
-    widget.focusNode.removeListener(_handleFocusChange);
     HardwareKeyboard.instance.removeHandler(_handleKeyEvent);
     _controller.dispose();
     super.dispose();
   }
-
-  // Only used to show/hide this field's own inline suggestion row when it
-  // gains or loses focus (see [_buildSuggestions]).
-  void _handleFocusChange() => setState(() {});
 
   // Backspace produces no text-change event at all when the field is
   // already empty (there's nothing to delete), so `onChanged` never fires
@@ -440,6 +657,15 @@ class MnemonicWordState extends State<MnemonicWord> {
   // `KeyboardListener`/`Focus.onKeyEvent`) to avoid re-parenting
   // [widget.focusNode], which is already attached to this field's
   // [TextField] and shouldn't be attached to two `Focus` nodes at once.
+  //
+  // NOTE: this only fires for a *physical* keyboard (desktop, or one
+  // attached to a phone/tablet) — most on-screen software keyboards don't
+  // synthesize a raw backspace key event when the field is already empty,
+  // only their own text-editing protocol, which produces nothing to
+  // observe here. There's no reliable, cross-IME way to detect that case;
+  // this is a best-effort enhancement for physical keyboards, not a
+  // substitute for the pointer-based recovery already offered by the
+  // "clear" (X) button.
   bool _handleKeyEvent(KeyEvent event) {
     if (event is KeyDownEvent &&
         event.logicalKey == LogicalKeyboardKey.backspace &&
@@ -455,161 +681,95 @@ class MnemonicWordState extends State<MnemonicWord> {
     return displayIndex < 10 ? '0$displayIndex' : '$displayIndex';
   }
 
-  void _selectWord(String word) {
-    _controller.text = word;
-    widget.onWordChanged((index: widget.index, word: word));
-    widget.onComplete();
-  }
-
-  /// Builds this field's own inline auto-complete row, directly below its
-  /// input — replacing a design where a single such row was shared by the
-  /// whole word grid and pinned far below it (see git history), forcing the
-  /// eye away from whatever field was actually being typed into.
-  ///
-  /// Returns `null` (no row, nothing scheduled) whenever there's nothing
-  /// useful to show: while unfocused, empty, or already unambiguously
-  /// resolved.
-  Widget? _buildSuggestions() {
-    if (!widget.focusNode.hasFocus || widget.word.isEmpty) return null;
-
-    final hints = widget.language.list.where(
-      (candidate) => candidate.startsWith(widget.word),
-    );
-
-    final isAlreadyResolved =
-        hints.length == 1 && hints.first == widget.word;
-    if (isAlreadyResolved) return null;
-
-    if (widget.allowAutoFillWords && hints.length == 1) {
-      // Scheduled for next frame only while not already resolved (see
-      // `isAlreadyResolved` above) — otherwise this would reschedule on
-      // every rebuild forever once a field uniquely matches a dictionary
-      // word, pinning the UI thread at 100% CPU. (This exact bug used to
-      // exist here when the equivalent check lived one level up, shared
-      // across the whole word grid — see git history.)
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => _selectWord(hints.first),
-      );
-    }
-
-    return Padding(
-      padding: EdgeInsets.only(top: widget.style.smallPadding),
-      child: SizedBox(
-        height: widget.style.inputHeight,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          itemCount: hints.length,
-          separatorBuilder: (_, _) =>
-              SizedBox(width: widget.style.standardSpacing),
-          itemBuilder: (context, index) {
-            final hint = hints.elementAt(index);
-            return _HintChip(
-              word: hint,
-              onTap: () => _selectWord(hint),
-              style: widget.style,
-            );
-          },
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final isValidWord = widget.language.isValid(widget.word);
     final style = widget.style;
-    final suggestions = _buildSuggestions();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: EdgeInsets.all(style.smallPadding),
-          decoration: style.standardDecoration(context),
-          height: style.inputHeight,
-          child: Row(
+    return Container(
+      padding: EdgeInsets.all(style.smallPadding),
+      decoration: style.standardDecoration(context),
+      height: style.inputHeight,
+      child: Row(
+        children: [
+          Stack(
+            clipBehavior: Clip.none,
             children: [
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    height: style.indexBoxSize,
-                    width: style.indexBoxSize,
-                    alignment: Alignment.center,
-                    decoration: style.statusDecoration(
-                      color: widget.word.isEmpty
-                          ? style.borderColor
-                          : isValidWord
+              Container(
+                height: style.indexBoxSize,
+                width: style.indexBoxSize,
+                alignment: Alignment.center,
+                decoration: style.statusDecoration(
+                  color: widget.word.isEmpty
+                      ? style.borderColor
+                      : isValidWord
+                      ? style.statusValidColor
+                      : style.statusErrorColor,
+                ),
+                child: Text(
+                  displayIndex,
+                  style:
+                      style.indexTextStyle ??
+                      const TextStyle(color: Colors.black),
+                ),
+              ),
+              // Redundant non-color cue for word validity (checkmark vs.
+              // cross), so status doesn't rely on the green/red hue alone —
+              // ~8% of men have red/green color vision deficiency.
+              if (widget.word.isNotEmpty)
+                Positioned(
+                  right: -4,
+                  bottom: -4,
+                  child: Container(
+                    width: 14,
+                    height: 14,
+                    decoration: const BoxDecoration(
+                      color: Colors.black,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      isValidWord
+                          ? Icons.check_rounded
+                          : Icons.priority_high_rounded,
+                      size: 10,
+                      color: isValidWord
                           ? style.statusValidColor
                           : style.statusErrorColor,
                     ),
-                    child: Text(
-                      displayIndex,
-                      style:
-                          style.indexTextStyle ??
-                          const TextStyle(color: Colors.black),
-                    ),
                   ),
-                  // Redundant non-color cue for word validity (checkmark vs.
-                  // cross), so status doesn't rely on the green/red hue alone
-                  // — ~8% of men have red/green color vision deficiency.
-                  if (widget.word.isNotEmpty)
-                    Positioned(
-                      right: -4,
-                      bottom: -4,
-                      child: Container(
-                        width: 14,
-                        height: 14,
-                        decoration: const BoxDecoration(
-                          color: Colors.black,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          isValidWord
-                              ? Icons.check_rounded
-                              : Icons.priority_high_rounded,
-                          size: 10,
-                          color: isValidWord
-                              ? style.statusValidColor
-                              : style.statusErrorColor,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              Expanded(
-                child: TextField(
-                  enableSuggestions: false,
-                  autocorrect: false,
-                  controller: _controller,
-                  style: style.wordTextStyle,
-                  onChanged: (value) {
-                    widget.onWordChanged((
-                      index: widget.index,
-                      word: _controller.text,
-                    ));
-                  },
-                  focusNode: widget.focusNode,
-                  clipBehavior: Clip.antiAliasWithSaveLayer,
-                  textInputAction: widget.textInputAction,
-                  onEditingComplete: widget.onComplete,
-                  decoration: style.standardInputDecoration(),
-                ),
-              ),
-              if (_controller.text.isNotEmpty || isValidWord)
-                IconButton(
-                  onPressed: () {
-                    _controller.clear();
-                    widget.onWordChanged((index: widget.index, word: ''));
-                  },
-                  icon: const Icon(Icons.close, size: 24),
-                  padding: EdgeInsets.zero,
                 ),
             ],
           ),
-        ),
-        if (suggestions != null) suggestions,
-      ],
+          Expanded(
+            child: TextField(
+              enableSuggestions: false,
+              autocorrect: false,
+              controller: _controller,
+              style: style.wordTextStyle,
+              onChanged: (value) {
+                widget.onWordChanged((
+                  index: widget.index,
+                  word: _controller.text,
+                ));
+              },
+              focusNode: widget.focusNode,
+              clipBehavior: Clip.antiAliasWithSaveLayer,
+              textInputAction: widget.textInputAction,
+              onEditingComplete: widget.onComplete,
+              decoration: style.standardInputDecoration(),
+            ),
+          ),
+          if (_controller.text.isNotEmpty || isValidWord)
+            IconButton(
+              onPressed: () {
+                _controller.clear();
+                widget.onWordChanged((index: widget.index, word: ''));
+              },
+              icon: const Icon(Icons.close, size: 24),
+              padding: EdgeInsets.zero,
+            ),
+        ],
+      ),
     );
   }
 }
@@ -619,22 +779,34 @@ class MnemonicSentenceWidget extends StatefulWidget {
   final List<String> words;
   final bip39.Language language;
   final Function(({int index, String word})) onWordChanged;
-  final bool allowAutoFillWords;
   final MnemonicWidgetStyle style;
 
-  /// Called when the last word's keyboard action (Done) is pressed, or when
-  /// it gets auto-filled/selected — submits the whole form directly instead
-  /// of silently doing nothing (there's no next field to advance focus to).
-  final VoidCallback onSubmit;
+  /// One per word, owned by the parent [MnemonicWidget] (which also needs
+  /// them to track which field is currently focused, for the shared
+  /// suggestion bar — see [MnemonicWidget]).
+  final List<FocusNode> focusNodes;
+
+  /// One per word, likewise owned by the parent: each word is wrapped in a
+  /// [CompositedTransformTarget] using its link, so the parent's floating
+  /// suggestion overlay can anchor itself under whichever field currently
+  /// has focus via [CompositedTransformFollower].
+  final List<LayerLink> layerLinks;
+
+  /// Called when a field is "done": either its keyboard action (Next/Done)
+  /// was pressed, or it was auto-filled to an unambiguous word. Takes the
+  /// completed field's index; advancing to the next field or submitting the
+  /// whole form (for the last word) is entirely up to the parent.
+  final ValueChanged<int> onWordComplete;
 
   const MnemonicSentenceWidget({
     super.key,
     required this.words,
     required this.language,
     required this.onWordChanged,
-    this.allowAutoFillWords = true,
     required this.style,
-    required this.onSubmit,
+    required this.focusNodes,
+    required this.layerLinks,
+    required this.onWordComplete,
   });
 
   @override
@@ -642,59 +814,11 @@ class MnemonicSentenceWidget extends StatefulWidget {
 }
 
 class _MnemonicSentenceWidgetState extends State<MnemonicSentenceWidget> {
-  List<FocusNode> focusNodes = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeFocusNodes();
-  }
-
-  @override
-  void didUpdateWidget(MnemonicSentenceWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.words.length != widget.words.length) {
-      _disposeFocusNodes();
-      _initializeFocusNodes();
+  void _focusPrevious(int index) {
+    final previousIndex = index - 1;
+    if (previousIndex >= 0 && previousIndex < widget.focusNodes.length) {
+      FocusScope.of(context).requestFocus(widget.focusNodes[previousIndex]);
     }
-  }
-
-  @override
-  void dispose() {
-    _disposeFocusNodes();
-    super.dispose();
-  }
-
-  void _initializeFocusNodes() {
-    focusNodes = List.generate(widget.words.length, (index) => FocusNode());
-  }
-
-  void _disposeFocusNodes() {
-    for (final node in focusNodes) {
-      node.dispose();
-    }
-    focusNodes.clear();
-  }
-
-  void _focusNext(int nextIndex) {
-    if (nextIndex < widget.words.length) {
-      if (nextIndex >= 0 && nextIndex < focusNodes.length) {
-        FocusScope.of(context).requestFocus(focusNodes[nextIndex]);
-      }
-    }
-  }
-
-  /// Builds the "this field is done" callback for [index]: advances to the
-  /// next field, or — for the last word — dismisses the keyboard and
-  /// submits the whole form, since there's no next field to advance to.
-  VoidCallback _onWordComplete(int index) {
-    if (index == widget.words.length - 1) {
-      return () {
-        FocusScope.of(context).unfocus();
-        widget.onSubmit();
-      };
-    }
-    return () => _focusNext(index + 1);
   }
 
   @override
@@ -711,60 +835,41 @@ class _MnemonicSentenceWidgetState extends State<MnemonicSentenceWidget> {
       (i) => (index: i + splitIndex, word: widget.words[i + splitIndex]),
     );
 
-    return Column(
+    Widget buildWord(({int index, String word}) entry) {
+      return CompositedTransformTarget(
+        link: widget.layerLinks[entry.index],
+        child: MnemonicWord(
+          index: entry.index,
+          word: entry.word,
+          language: widget.language,
+          onWordChanged: widget.onWordChanged,
+          focusNode: widget.focusNodes[entry.index],
+          onComplete: () => widget.onWordComplete(entry.index),
+          onBackspaceEmpty: () => _focusPrevious(entry.index),
+          textInputAction: entry.index == widget.words.length - 1
+              ? TextInputAction.done
+              : TextInputAction.next,
+          style: style,
+        ),
+      );
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: style.standardSpacing,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: style.standardSpacing,
-          children: [
-            Expanded(
-              child: Column(
-                spacing: style.standardSpacing,
-                children: leftWords
-                    .map(
-                      (entry) => MnemonicWord(
-                        index: entry.index,
-                        word: entry.word,
-                        language: widget.language,
-                        onWordChanged: widget.onWordChanged,
-                        focusNode: focusNodes[entry.index],
-                        onComplete: _onWordComplete(entry.index),
-                        onBackspaceEmpty: () => _focusNext(entry.index - 1),
-                        allowAutoFillWords: widget.allowAutoFillWords,
-                        textInputAction: entry.index == widget.words.length - 1
-                            ? TextInputAction.done
-                            : TextInputAction.next,
-                        style: style,
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
-            Expanded(
-              child: Column(
-                spacing: style.standardSpacing,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: rightWords
-                    .map(
-                      (entry) => MnemonicWord(
-                        index: entry.index,
-                        word: entry.word,
-                        language: widget.language,
-                        onWordChanged: widget.onWordChanged,
-                        focusNode: focusNodes[entry.index],
-                        onComplete: _onWordComplete(entry.index),
-                        onBackspaceEmpty: () => _focusNext(entry.index - 1),
-                        allowAutoFillWords: widget.allowAutoFillWords,
-                        textInputAction: entry.index == widget.words.length - 1
-                            ? TextInputAction.done
-                            : TextInputAction.next,
-                        style: style,
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
-          ],
+        Expanded(
+          child: Column(
+            spacing: style.standardSpacing,
+            children: leftWords.map(buildWord).toList(),
+          ),
+        ),
+        Expanded(
+          child: Column(
+            spacing: style.standardSpacing,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: rightWords.map(buildWord).toList(),
+          ),
         ),
       ],
     );
