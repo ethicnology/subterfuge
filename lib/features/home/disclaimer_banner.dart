@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:subterfuge/shared/info_banner.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DisclaimerBanner extends StatelessWidget {
@@ -6,22 +7,22 @@ class DisclaimerBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialBanner(
-      padding: const EdgeInsets.all(20),
-      content: const Text(
-        'Dont trust, verify',
-        style: TextStyle(color: Colors.black),
-      ),
-      leading: const Icon(Icons.pan_tool, color: Colors.redAccent),
-      backgroundColor: Colors.tealAccent,
-      actions: <Widget>[
-        ElevatedButton(
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: InfoBanner(
+        severity: InfoBannerSeverity.warning,
+        icon: Icons.pan_tool_rounded,
+        content: const Text(
+          "Don't trust, verify",
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        action: OutlinedButton(
           onPressed: () {
             launchUrl(Uri.parse('https://github.com/ethicnology/subterfuge'));
           },
           child: const Text('VERIFY'),
         ),
-      ],
+      ),
     );
   }
 }

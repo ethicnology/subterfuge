@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:subterfuge/features/show_secret/cubit.dart';
 import 'package:subterfuge/features/show_secret/state.dart';
+import 'package:subterfuge/shared/info_banner.dart';
+import 'package:subterfuge/shared/numbered_words_view.dart';
+import 'package:subterfuge/shared/revealable_secret.dart';
 import 'package:subterfuge/shared/secure_clipboard.dart';
 
 class ShowSecretPage extends StatelessWidget {
@@ -57,34 +60,15 @@ class _ShowSecretViewState extends State<_ShowSecretView> {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.errorContainer.withValues(alpha: 0.4),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.warning_amber_rounded,
-                          color: Theme.of(context).colorScheme.error,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'If a passphrase was used and it was incorrect, '
-                            'SLIP-39 silently returns a different, still '
-                            'valid-looking secret. Always verify the '
-                            'Extended Public Key (or addresses) below '
-                            'against your wallet before relying on this.',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ),
-                      ],
+                  InfoBanner(
+                    severity: InfoBannerSeverity.warning,
+                    icon: Icons.warning_amber_rounded,
+                    content: const Text(
+                      'If a passphrase was used and it was incorrect, '
+                      'SLIP-39 silently returns a different, still '
+                      'valid-looking secret. Always verify the '
+                      'Extended Public Key (or addresses) below '
+                      'against your wallet before relying on this.',
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -94,6 +78,7 @@ class _ShowSecretViewState extends State<_ShowSecretView> {
                         ? Icons.article_rounded
                         : Icons.key_rounded,
                     content: state.displaySecret,
+                    isMnemonic: state.isEntropy,
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -176,14 +161,22 @@ class _SecretCard extends StatelessWidget {
   final IconData icon;
   final String content;
 
+  /// Whether [content] is a BIP-39 mnemonic sentence — if so, it's shown as
+  /// a numbered word grid (see [NumberedWordsView]) instead of a flowing
+  /// monospace paragraph, matching the numbering convention already used
+  /// when *entering* a mnemonic and reducing transcription errors.
+  final bool isMnemonic;
+
   const _SecretCard({
     required this.title,
     required this.icon,
     required this.content,
+    this.isMnemonic = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.circular(12);
     return Card(
       elevation: 4,
       child: Padding(
@@ -207,16 +200,24 @@ class _SecretCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: SelectableText(
-                content,
-                style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+            RevealableSecret(
+              borderRadius: borderRadius,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: borderRadius,
+                ),
+                child: isMnemonic
+                    ? NumberedWordsView(text: content)
+                    : SelectableText(
+                        content,
+                        style: const TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 12,
+                        ),
+                      ),
               ),
             ),
             const SizedBox(height: 16),

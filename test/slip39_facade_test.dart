@@ -140,4 +140,34 @@ void main() {
       }
     });
   });
+
+  group('Slip39Facade async (compute/isolate) variants', () {
+    Uint8List secretOf(String hexString) =>
+        Uint8List.fromList(hex.decode(hexString));
+
+    test(
+      'shareAsync/combineAsync round-trip the same result as the sync API',
+      () async {
+        const secretHex = 'deadbeefdeadbeefdeadbeefdeadbeef';
+        final secret = secretOf(secretHex);
+        const passphrase = 'isolate-roundtrip';
+
+        final shares = await Slip39Facade.shareAsync(
+          shares: 4,
+          threshold: 2,
+          masterSecret: secret,
+          passphrase: passphrase,
+        );
+
+        expect(shares.length, 4);
+
+        final recovered = await Slip39Facade.combineAsync(
+          shares: [shares[1], shares[3]],
+          passphrase: passphrase,
+        );
+
+        expect(hex.encode(recovered), secretHex);
+      },
+    );
+  });
 }

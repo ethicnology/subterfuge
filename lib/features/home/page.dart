@@ -3,6 +3,7 @@ import 'package:subterfuge/features/import_mnemonic/page.dart';
 import 'package:subterfuge/features/merge_shares/page.dart';
 import 'package:subterfuge/features/home/support_widget.dart';
 import 'package:subterfuge/features/home/disclaimer_banner.dart';
+import 'package:subterfuge/shared/action_card.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -23,53 +24,77 @@ class HomePage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     const DisclaimerBanner(),
-                    const SizedBox(height: 20),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: SelectableText.rich(
-                        TextSpan(
-                          children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // A concrete, one-line tagline first, so a
+                          // first-time user immediately knows what this
+                          // app does — the dictionary-definition branding
+                          // below is evocative but doesn't explain that.
+                          Text(
+                            'Split any secret into shares. Recover it only '
+                            'when enough of them are combined.',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          const SizedBox(height: 12),
+                          const SelectableText.rich(
                             TextSpan(
-                              text: 'subterfuge',
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              children: [
+                                TextSpan(
+                                  text: 'subterfuge',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                TextSpan(
+                                  text:
+                                      ': An indirect or deceptive device or stratagem.',
+                                ),
+                              ],
                             ),
-                            TextSpan(
-                              text:
-                                  ': An indirect or deceptive device or stratagem.',
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
-                    SizedBox(height: 50),
-                    FilledButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ImportMnemonicPage(),
+                    const SizedBox(height: 32),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        children: [
+                          ActionCard(
+                            icon: Icons.call_split_rounded,
+                            title: 'Share mnemonic',
+                            subtitle:
+                                'Split a mnemonic or secret into shares that '
+                                'require a threshold of them to recover.',
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const ImportMnemonicPage(),
+                              ),
+                            ),
                           ),
-                        );
-                      },
-                      icon: const Icon(Icons.share_rounded),
-                      label: const Text('Share mnemonic'),
-                    ),
-                    const SizedBox(height: 50),
-                    FilledButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const MergeSharesPage(),
+                          const SizedBox(height: 16),
+                          ActionCard(
+                            icon: Icons.restore_rounded,
+                            title: 'Recover mnemonic',
+                            subtitle:
+                                'Combine previously created shares back '
+                                'into the original secret.',
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const MergeSharesPage(),
+                              ),
+                            ),
                           ),
-                        );
-                      },
-                      icon: const Icon(Icons.merge_type_rounded),
-                      label: const Text('Recover mnemonic'),
+                        ],
+                      ),
                     ),
                     const Spacer(),
                     const Padding(
-                      padding: EdgeInsets.only(left: 0, right: 0, bottom: 50),
+                      padding: EdgeInsets.only(top: 32, bottom: 32),
                       child: SupportDeveloperWidget(),
                     ),
                   ],
