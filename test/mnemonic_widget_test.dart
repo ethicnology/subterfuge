@@ -1,4 +1,5 @@
 import 'package:bip39_mnemonic/bip39_mnemonic.dart' as bip39;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -226,6 +227,29 @@ void main() {
 
         expect(find.text('abandon'), findsOneWidget);
 
+        // Regression test: the Overlay gives its entries tight, full-size
+        // constraints by default (the same way a Stack does for a
+        // non-Positioned child), which previously made this card silently
+        // expand to fill the entire window instead of respecting its own
+        // width/height — it was still functionally "there" (findsOneWidget
+        // above still passed) but visually covered the whole screen and
+        // ate every tap on it. A width assertion catches what a pure
+        // presence check can't. (The card's own widget type is private to
+        // mnemonic_widget.dart, so it's identified here by its
+        // CompositedTransformFollower ancestor instead of by type.)
+        final cardElement = find
+            .byType(Material)
+            .evaluate()
+            .firstWhere(
+              (el) => el
+                  .findAncestorWidgetOfExactType<CompositedTransformFollower>() !=
+                  null,
+            );
+        expect(
+          (cardElement.renderObject as RenderBox).size.width,
+          lessThan(300),
+        );
+
         tester.widget<TextField>(fields.at(1)).focusNode!.requestFocus();
         await tester.pump();
 
@@ -260,6 +284,42 @@ void main() {
         await tester.pump();
 
         expect(find.text('abandon'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'a mouse click (not just touch) on a suggestion chip fills the '
+      'word — regression test for EditableText\'s default "tap outside" '
+      'handling (which only exempts touch, not mouse clicks) tearing the '
+      'floating card down before the click reaches the chip',
+      (tester) async {
+        await tester.pumpWidget(
+          _wrap(
+            MnemonicWidget(
+              allowLanguageSelection: false,
+              allowLengthSelection: false,
+              allowPassphrase: false,
+              allowAutoFillWords: false,
+              onSubmit: (_) {},
+            ),
+          ),
+        );
+
+        final fields = find.byType(TextField);
+        await tester.enterText(fields.at(0), 'ab');
+        await tester.pump();
+
+        await tester.tap(find.text('abandon'), kind: PointerDeviceKind.mouse);
+        await tester.pump();
+
+        expect(
+          tester.widget<TextField>(fields.at(0)).controller!.text,
+          'abandon',
+        );
+        expect(
+          tester.widget<TextField>(fields.at(1)).focusNode!.hasFocus,
+          isTrue,
+        );
       },
     );
   });

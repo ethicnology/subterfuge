@@ -514,11 +514,30 @@ class _MnemonicWidgetState extends State<MnemonicWidget> {
                 targetAnchor: Alignment.bottomLeft,
                 followerAnchor: Alignment.topLeft,
                 offset: const Offset(0, 4),
-                child: _SuggestionsCard(
-                  hints: hints,
-                  style: style,
-                  width: 220,
-                  onSelect: (word) => _selectSuggestion(focusedIndex, word),
+                // The Overlay gives its entries tight, full-size
+                // constraints (the same way a Stack does for a
+                // non-Positioned child) — without this Align, that would
+                // force _SuggestionsCard to expand to fill the entire
+                // window instead of respecting its own explicit width/
+                // height, since Align (unlike most widgets) always passes
+                // loose constraints down to its child regardless of what
+                // it itself receives.
+                // The Overlay gives its entries tight, full-size
+                // constraints (the same way a Stack does for a
+                // non-Positioned child) — without this Align, that would
+                // force _SuggestionsCard to expand to fill the entire
+                // window instead of respecting its own explicit width/
+                // height, since Align (unlike most widgets) always passes
+                // loose constraints down to its child regardless of what
+                // it itself receives.
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: _SuggestionsCard(
+                    hints: hints,
+                    style: style,
+                    width: 220,
+                    onSelect: (word) => _selectSuggestion(focusedIndex, word),
+                  ),
                 ),
               );
             },
@@ -562,24 +581,32 @@ class _SuggestionsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: Container(
-        width: width,
-        height: style.inputHeight,
-        padding: EdgeInsets.all(style.smallPadding),
-        decoration: style.standardDecoration(context),
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          itemCount: hints.length,
-          separatorBuilder: (_, _) => SizedBox(width: style.standardSpacing),
-          itemBuilder: (context, index) {
-            final hint = hints[index];
-            return _HintChip(
-              word: hint,
-              onTap: () => onSelect(hint),
-              style: style,
-            );
-          },
+    // Without this, a mouse click (desktop) on a chip first unfocuses the
+    // word field this card belongs to — EditableText's default "tap
+    // outside" handling, which only exempts *touch* events, not mouse
+    // clicks — which tears this whole card down before the click actually
+    // reaches _HintChip's onTap. TextFieldTapRegion tells that machinery
+    // this card counts as part of the field, not "outside" it.
+    return TextFieldTapRegion(
+      child: Material(
+        child: Container(
+          width: width,
+          height: style.inputHeight,
+          padding: EdgeInsets.all(style.smallPadding),
+          decoration: style.standardDecoration(context),
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: hints.length,
+            separatorBuilder: (_, _) => SizedBox(width: style.standardSpacing),
+            itemBuilder: (context, index) {
+              final hint = hints[index];
+              return _HintChip(
+                word: hint,
+                onTap: () => onSelect(hint),
+                style: style,
+              );
+            },
+          ),
         ),
       ),
     );
