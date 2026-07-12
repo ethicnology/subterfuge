@@ -5,7 +5,7 @@
     "display": "standalone",
     "background_color": "#hexcode",
     "theme_color": "#hexcode",
-    "description": "A new Flutter project.",
+    "description": "A Shamir Secret Sharing tool implementing the SLIP-39 standard.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

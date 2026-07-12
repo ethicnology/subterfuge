@@ -10,26 +10,25 @@ class MergeSharesCubit extends Cubit<MergeSharesState> {
     emit(state.copyWith(sharesCount: sharesCount));
   }
 
-  void mergeShares({
+  Future<void> mergeShares({
     required int sharesCount,
     required List<String> shares,
     required String passphrase,
-  }) {
+  }) async {
     try {
-      emit(state.copyWith(error: null, secret: null));
+      emit(state.copyWith(error: null, secret: null, isLoading: true));
 
-      final secret = Slip39Facade.combine(
+      // Runs off the UI thread — see Slip39Facade.combineAsync.
+      final secret = await Slip39Facade.combineAsync(
         shares: shares,
         passphrase: passphrase,
       );
 
       emit(state.copyWith(secret: secret));
     } catch (e) {
-      if (e is AppError) {
-        emit(state.copyWith(error: AppError(e.message)));
-      } else {
-        emit(state.copyWith(error: AppError(e.toString())));
-      }
+      emit(state.copyWith(error: toSafeAppError(e)));
+    } finally {
+      emit(state.copyWith(isLoading: false));
     }
   }
 

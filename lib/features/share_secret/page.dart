@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:subterfuge/features/import_mnemonic/page.dart';
 import 'package:subterfuge/features/show_shares/page.dart';
+import 'package:subterfuge/shared/info_banner.dart';
+import 'package:subterfuge/shared/number_stepper_field.dart';
 import 'cubit.dart';
 import 'state.dart';
 
@@ -20,8 +22,13 @@ class _ShareSecretState extends State<ShareSecretPage> {
   final _formKey = GlobalKey<FormState>();
   final secret = TextEditingController();
   final passphrase = TextEditingController();
-  final participants = TextEditingController();
-  final threshold = TextEditingController();
+
+  // Pre-filled with sensible, commonly-used defaults (3 participants, a
+  // 2-of-3 threshold) rather than starting empty: most first-time users
+  // have never configured an m-of-n secret-sharing scheme before, and a
+  // working example to tweak is far more approachable than a blank field.
+  int _participants = 3;
+  int _threshold = 2;
 
   @override
   void initState() {
@@ -35,8 +42,6 @@ class _ShareSecretState extends State<ShareSecretPage> {
   void dispose() {
     secret.dispose();
     passphrase.dispose();
-    participants.dispose();
-    threshold.dispose();
     super.dispose();
   }
 
@@ -55,7 +60,7 @@ class _ShareSecretState extends State<ShareSecretPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.error!.message),
-                backgroundColor: Colors.red,
+                backgroundColor: Theme.of(context).colorScheme.error,
               ),
             );
             cubit.clearError();
@@ -80,45 +85,43 @@ class _ShareSecretState extends State<ShareSecretPage> {
                 child: SizedBox(
                   width: 500,
                   child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         if (widget.secret == null) ...[
-                          MaterialBanner(
-                            padding: const EdgeInsets.all(20),
+                          InfoBanner(
+                            icon: Icons.help_outline_rounded,
                             content: const Text(
-                              'Your secret is a mnemonic?\nExtract the entropy',
-                              style: TextStyle(color: Colors.black),
+                              'Your secret is a mnemonic? '
+                              'Extract the entropy first.',
                             ),
-                            leading: const Icon(
-                              Icons.help,
-                              color: Colors.black,
-                              size: 32,
+                            action: FilledButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ImportMnemonicPage(),
+                                  ),
+                                );
+                              },
+                              child: const Text('Mnemonic'),
                             ),
-                            backgroundColor: Colors.tealAccent,
-                            actions: <Widget>[
-                              ElevatedButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const ImportMnemonicPage(),
-                                    ),
-                                  );
-                                },
-                                child: const Text('Mnemonic'),
-                              ),
-                            ],
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 16),
                         ],
                         Card(
                           child: Padding(
-                            padding: const .all(7),
+                            padding: const EdgeInsets.all(12),
                             child: TextFormField(
                               controller: secret,
                               readOnly: widget.secret != null,
-                              autovalidateMode: .onUserInteraction,
+                              enableSuggestions: false,
+                              autocorrect: false,
+                              keyboardType: TextInputType.visiblePassword,
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
                               decoration: const InputDecoration(
                                 border: UnderlineInputBorder(),
                                 hintText:
@@ -132,8 +135,14 @@ class _ShareSecretState extends State<ShareSecretPage> {
                                 if (value.length < 32) {
                                   return 'At least 32 characters (16 bytes)';
                                 }
-                                if (!((value.length % 2) == 0)) {
-                                  return 'Not an even number of characters';
+                                if (value.length > 128) {
+                                  return 'At most 128 characters (64 bytes)';
+                                }
+                                // SLIP-39 requires an even number of BYTES,
+                                // i.e. a hex string length that is a
+                                // multiple of 4 (2 hex chars per byte).
+                                if (value.length % 4 != 0) {
+                                  return 'Must be a multiple of 4 characters (whole bytes, even count)';
                                 }
                                 try {
                                   hex.decode(value);
@@ -145,113 +154,117 @@ class _ShareSecretState extends State<ShareSecretPage> {
                             ),
                           ),
                         ),
-                        Card(
-                          child: Column(
-                            children: [
-                              Padding(
-                                padding: const .all(7),
-                                child: TextFormField(
-                                  enableSuggestions: false,
-                                  autocorrect: false,
-                                  controller: passphrase,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Passphrase (optional)',
-                                    hintText:
-                                        'eg. ThisIsNotYourMnemonicPassphrase',
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        const SizedBox(height: 12),
                         Card(
                           child: Padding(
-                            padding: const .all(7),
-                            child: Row(
-                              mainAxisAlignment: .spaceBetween,
+                            padding: const EdgeInsets.all(12),
+                            child: TextFormField(
+                              enableSuggestions: false,
+                              autocorrect: false,
+                              controller: passphrase,
+                              decoration: const InputDecoration(
+                                labelText: 'Passphrase (optional)',
+                                hintText: 'eg. ThisIsNotYourMnemonicPassphrase',
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
                               children: [
-                                Flexible(
-                                  child: SizedBox(
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                    child: TextFormField(
-                                      controller: participants,
-                                      keyboardType: .number,
-                                      decoration: const InputDecoration(
-                                        border: UnderlineInputBorder(),
-                                        labelText: 'Participants',
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Expanded(
+                                      child: NumberStepperField(
+                                        label: 'Participants',
+                                        min: 1,
+                                        max: 16,
+                                        initialValue: _participants,
+                                        onChanged: (value) {
+                                          setState(() => _participants = value);
+                                          // Re-validate the threshold field
+                                          // whenever participants changes,
+                                          // so "threshold <= participants"
+                                          // is always enforced live.
+                                          _formKey.currentState?.validate();
+                                        },
                                       ),
-                                      autovalidateMode: .onUserInteraction,
-                                      validator: (value) {
-                                        if (value == null ||
-                                            value.isEmpty ||
-                                            int.tryParse(value) == null) {
-                                          return 'Between 1 and 16';
-                                        }
-                                        if (int.parse(value) < 1 ||
-                                            int.parse(value) > 16) {
-                                          return 'Between 1 and 16';
-                                        }
-                                        return null;
-                                      },
                                     ),
-                                  ),
+                                    Expanded(
+                                      child: NumberStepperField(
+                                        label: 'Threshold',
+                                        min: 1,
+                                        max: 16,
+                                        initialValue: _threshold,
+                                        onChanged: (value) =>
+                                            setState(() => _threshold = value),
+                                        validator: (value) {
+                                          if (value != null &&
+                                              value > _participants) {
+                                            return 'Cannot exceed participants ($_participants)';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const Spacer(),
-                                Flexible(
-                                  child: SizedBox(
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                    child: TextFormField(
-                                      controller: threshold,
-                                      keyboardType: .number,
-                                      decoration: const InputDecoration(
-                                        border: UnderlineInputBorder(),
-                                        labelText: 'Threshold',
+                                const SizedBox(height: 16),
+                                // Live summary so the m-of-n scheme being
+                                // configured is unambiguous before
+                                // submitting.
+                                Text(
+                                  '$_participants shares will be created; '
+                                  '$_threshold of them will be needed to '
+                                  'recover the secret.',
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
                                       ),
-                                      autovalidateMode: .onUserInteraction,
-                                      validator: (value) {
-                                        if (value == null ||
-                                            value.isEmpty ||
-                                            int.tryParse(value) == null) {
-                                          return 'Between 1 and 16';
-                                        }
-                                        if (int.parse(value) < 1 ||
-                                            int.parse(value) > 16) {
-                                          return 'Between 1 and 16';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                  ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                        Padding(
-                          padding: const .only(top: 3),
-                          child: FilledButton.icon(
-                            onPressed: state.isLoading
-                                ? null
-                                : () {
-                                    if (_formKey.currentState!.validate()) {
-                                      cubit.shareSecret(
-                                        participants: int.parse(
-                                          participants.text,
-                                        ),
-                                        threshold: int.parse(threshold.text),
-                                        masterSecret: Uint8List.fromList(
-                                          hex.decode(secret.text),
-                                        ),
-                                        passphrase: passphrase.text,
-                                      );
-                                    }
-                                  },
-                            icon: const Icon(Icons.check_circle_rounded),
-                            label: const Text('Submit'),
+                        const SizedBox(height: 16),
+                        FilledButton.icon(
+                          onPressed: state.isLoading
+                              ? null
+                              : () {
+                                  if (_formKey.currentState!.validate()) {
+                                    cubit.shareSecret(
+                                      participants: _participants,
+                                      threshold: _threshold,
+                                      masterSecret: Uint8List.fromList(
+                                        hex.decode(secret.text),
+                                      ),
+                                      passphrase: passphrase.text,
+                                    );
+                                  }
+                                },
+                          icon: state.isLoading
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.black,
+                                  ),
+                                )
+                              : const Icon(Icons.check_circle_rounded),
+                          label: Text(
+                            state.isLoading ? 'Generating…' : 'Submit',
                           ),
                         ),
+                        const SizedBox(height: 16),
                       ],
                     ),
                   ),

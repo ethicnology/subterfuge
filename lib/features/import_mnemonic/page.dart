@@ -10,6 +10,9 @@ class ImportMnemonicPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // MnemonicWidget positions its own suggestion bar relative to the raw
+      // keyboard inset (see its class doc) — must not be pre-consumed here.
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(title: const Text('Import Mnemonic')),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),

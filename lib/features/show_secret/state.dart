@@ -1,8 +1,5 @@
 import 'package:bip39_mnemonic/bip39_mnemonic.dart';
-import 'package:dart_mappable/dart_mappable.dart';
 import 'package:flutter/foundation.dart';
-
-part 'state.mapper.dart';
 
 enum ScriptType {
   legacy(title: 'Legacy (BIP44)'),
@@ -33,8 +30,11 @@ enum SecretType {
   }
 }
 
-@MappableClass()
-class ShowSecretState with ShowSecretStateMappable {
+/// Sentinel used to distinguish "argument not passed" from "argument
+/// explicitly set to null" in [ShowSecretState.copyWith].
+const Object _unset = Object();
+
+class ShowSecretState {
   final Uint8List secret;
   final ScriptType scriptType;
   final int account;
@@ -48,6 +48,23 @@ class ShowSecretState with ShowSecretStateMappable {
     this.extendedPublicKey,
     this.error,
   });
+
+  ShowSecretState copyWith({
+    ScriptType? scriptType,
+    int? account,
+    Object? extendedPublicKey = _unset,
+    Object? error = _unset,
+  }) {
+    return ShowSecretState(
+      secret: secret,
+      scriptType: scriptType ?? this.scriptType,
+      account: account ?? this.account,
+      extendedPublicKey: identical(extendedPublicKey, _unset)
+          ? this.extendedPublicKey
+          : extendedPublicKey as String?,
+      error: identical(error, _unset) ? this.error : error as String?,
+    );
+  }
 
   /// Auto-detected secret type based on length
   SecretType get secretType => SecretType.fromBytes(secret);
@@ -85,4 +102,14 @@ class ShowSecretState with ShowSecretStateMappable {
     }
     return secretHex;
   }
+
+  // Secret material is intentionally NOT included here: never
+  // log/print/persist this state. Keep this override minimal and redacted
+  // so any accidental future `print(state)` / crash-report attachment
+  // cannot leak the secret, mnemonic, or derived key.
+  @override
+  String toString() =>
+      'ShowSecretState(secretType: $secretType, scriptType: $scriptType, '
+      'account: $account, hasExtendedPublicKey: ${extendedPublicKey != null}, '
+      'error: ${error == null ? 'none' : 'present'})';
 }

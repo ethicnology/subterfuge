@@ -42,7 +42,7 @@ Manage access to services, hardware, or documents using a shared secret scheme. 
 
 Secure documents and funds for your heirs. Create a recovery scheme that allows your relatives to access your digital assets only when necessary (e.g., in case of death).
 
-## [Support my work](http://support.ethicnology.com?app=furtive)
+## [Support my work](http://support.ethicnology.com?app=subterfuge)
 
 ## Screenshots
 
@@ -62,7 +62,6 @@ Secure documents and funds for your heirs. Create a recovery scheme that allows 
 curl -fsSL https://fvm.app/install.sh | bash
 fvm install
 fvm flutter pub get
-fvm dart run build_runner build --delete-conflicting-outputs
 fvm flutter build
 ```
 

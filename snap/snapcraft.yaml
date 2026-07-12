@@ -1,5 +1,5 @@
 name: subterfuge
-version: 1.0.0
+version: 2.0.0
 summary: Shamir Secret Sharing SLIP39
 description: A Shamir secret sharing experience using SLIP39 implementation.
 
@@ -17,8 +17,12 @@ apps:
   subterfuge:
     command: subterfuge
     extensions: [flutter-master]
-    plugs:
-      - network
+    # No `network` plug: this app never performs network I/O (verified: no
+    # network/HTTP dependency in pubspec.yaml, no INTERNET permission in the
+    # Android release manifest, no network-client entitlement in the macOS
+    # release sandbox). url_launcher delegates to the user's default browser
+    # via the desktop portal, which does not require this app's own network
+    # access.
     slots:
       - dbus-subterfuge
 parts:

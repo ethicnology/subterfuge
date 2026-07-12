@@ -7,16 +7,18 @@ import '../../shared/slip39_facade.dart';
 class ShareSecretCubit extends Cubit<ShareSecretState> {
   ShareSecretCubit() : super(ShareSecretState());
 
-  void shareSecret({
+  Future<void> shareSecret({
     required int participants,
     required int threshold,
     required Uint8List masterSecret,
     required String passphrase,
-  }) {
+  }) async {
     emit(state.copyWith(shares: [], error: null, isLoading: true));
 
     try {
-      final secretShares = Slip39Facade.share(
+      // Runs off the UI thread: PBKDF2 (20000 iterations) would otherwise
+      // visibly hitch the frame for larger participant/threshold counts.
+      final secretShares = await Slip39Facade.shareAsync(
         shares: participants,
         threshold: threshold,
         masterSecret: masterSecret,
@@ -25,11 +27,7 @@ class ShareSecretCubit extends Cubit<ShareSecretState> {
 
       emit(state.copyWith(shares: secretShares));
     } catch (e) {
-      if (e is AppError) {
-        emit(state.copyWith(error: AppError(e.message)));
-      } else {
-        emit(state.copyWith(error: AppError(e.toString())));
-      }
+      emit(state.copyWith(error: toSafeAppError(e)));
     } finally {
       emit(state.copyWith(isLoading: false));
     }

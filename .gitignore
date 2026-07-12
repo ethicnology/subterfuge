@@ -50,6 +50,5 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# FVM Version Cache
-.fvm/
-*.mapper.dart
+# Security/code audit reports: local working documents only, never committed.
+AUDIT_REPORT.md

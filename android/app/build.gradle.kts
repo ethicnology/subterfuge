@@ -36,7 +36,10 @@ android {
             signingConfig = null
         }
         release {
-            // No signing configuration: this will produce an unsigned release APK/AAB.
+            // No signing configuration here: this produces an unsigned release
+            // APK/AAB. CI signs it afterwards with `paraph`/`apksigner` (see
+            // .github/workflows/cross-platform_build.yaml) when the signing
+            // secrets are configured; otherwise it stays unsigned + checksummed.
         }
     }
 }
